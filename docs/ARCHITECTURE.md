@@ -337,7 +337,7 @@ android/app/src/main/kotlin/confi/uniffi/*.kt  (generated)
 | Module | Responsibilities |
 |---|---|
 | `common::errors` | All error types with codes and messages |
-| `common::models` | FileInfo, Job, JobStatus, OperationResult, Progress |
+| `common::models` | FileFormat, ImageOutputFormat, ResizeDimensions. Job, JobStatus, Progress and OperationResult are defined in `job_manager` alongside their first consumer |
 | `common::configuration` | Compression presets, quality defaults, format constraints |
 | `file_engine::detection` | Magic-byte analysis, MIME type resolution |
 | `file_engine::validation` | Input sanity checks before operations begin |

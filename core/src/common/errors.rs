@@ -64,15 +64,8 @@ pub struct ConfiError {
     /// Human-readable message suitable for display after platform-layer i18n.
     pub message: String,
     /// Internal diagnostic detail. Must not be exposed to users in production.
-    #[source]
-    pub detail: Option<DetailError>,
+    pub detail: Option<String>,
 }
-
-/// Wraps a diagnostic string as a `std::error::Error` so `thiserror`'s
-/// `#[source]` attribute can chain it.
-#[derive(Debug, Clone, Error)]
-#[error("{0}")]
-pub struct DetailError(pub String);
 
 impl ConfiError {
     pub fn new(code: ErrorCode, message: impl Into<String>) -> Self {
@@ -91,7 +84,7 @@ impl ConfiError {
         Self {
             code,
             message: message.into(),
-            detail: Some(DetailError(detail.into())),
+            detail: Some(detail.into()),
         }
     }
 
@@ -125,13 +118,6 @@ impl ConfiError {
         Self::new(
             ErrorCode::PasswordRequired,
             "This PDF is password-protected. Remove the password before processing.",
-        )
-    }
-
-    pub fn insufficient_space() -> Self {
-        Self::new(
-            ErrorCode::InsufficientSpace,
-            "Not enough storage space to complete this operation.",
         )
     }
 

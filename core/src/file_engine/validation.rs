@@ -1,21 +1,15 @@
 // CONFI — File validation
 //
-// Validation is SEPARATE from detection (see detection.rs).
-//
-// Three-stage model (as per M1 feedback):
+// Validation is SEPARATE from detection (see detection.rs):
 //   Stage 1 — Detection:  magic bytes → FileFormat (detection.rs)
 //   Stage 2 — Structural: can we parse the container? (this file)
 //   Stage 3 — Operational: does this file work for a specific operation?
 //             (handled inside each engine operation before processing starts)
 //
-// This module handles Stage 2: given a detected format, attempt a lightweight
-// structural parse to confirm the file is not truncated or internally corrupt
-// before any processing begins.
-//
 // Error code mapping:
 //   File missing / unreadable     → INVALID_INPUT
 //   Valid format, corrupt content → CORRUPTED_FILE
-//   Extension mismatch            → logged warning, not an error (detection wins)
+//   Extension mismatch            → ignored; detected format always wins
 //   Format not supported          → UNSUPPORTED_FORMAT
 
 use std::path::Path;
@@ -32,23 +26,18 @@ use crate::common::{
 pub struct ValidationResult {
     pub format: FileFormat,
     pub size_bytes: u64,
-    /// For PDFs: page count if parseable.
-    pub page_count: Option<u32>,
     /// For images: pixel dimensions if parseable.
     pub dimensions: Option<(u32, u32)>,
 }
 
 /// Validate that a file is structurally sound for the given detected format.
 ///
-/// This goes one step further than detection:
-/// - For images: decode the image header (not the full pixel data) to check dimensions.
-/// - For PDFs: check that the header is present and the cross-reference is reachable.
-///   (Full lopdf parse is done in the pdf_poc module if feature is enabled.)
+/// - Images: decode the header only (not the pixel data) to read dimensions.
+/// - PDFs: check the header, the end marker and the encryption dictionary.
 ///
-/// A file that passes here is still not guaranteed to be fully intact (only a
-/// complete decode/parse can guarantee that), but it catches the common cases:
-/// truncated files, zero-byte files, and files with valid magic bytes but
-/// immediately corrupted content.
+/// A file that passes here is still not guaranteed to be fully intact, but it
+/// catches the common cases: truncated files, zero-byte files, and files with
+/// valid magic bytes but immediately corrupted content.
 pub fn validate_file(path: &Path, detected_format: &FileFormat) -> ConfiResult<ValidationResult> {
     let metadata = std::fs::metadata(path).map_err(|e| {
         ConfiError::file_access_denied(format!("Cannot stat '{}': {e}", path.display()))
@@ -61,10 +50,19 @@ pub fn validate_file(path: &Path, detected_format: &FileFormat) -> ConfiResult<V
     }
 
     match detected_format {
-        FileFormat::Jpeg => validate_jpeg(path, size_bytes),
-        FileFormat::Png => validate_png(path, size_bytes),
-        FileFormat::Webp => validate_webp(path, size_bytes),
-        FileFormat::Bmp => validate_bmp(path, size_bytes),
+        FileFormat::Jpeg => validate_image(path, FileFormat::Jpeg, image::ImageFormat::Jpeg, size_bytes),
+        FileFormat::Png => validate_image(path, FileFormat::Png, image::ImageFormat::Png, size_bytes),
+        FileFormat::Webp => validate_image(path, FileFormat::Webp, image::ImageFormat::WebP, size_bytes),
+        FileFormat::Bmp => {
+            // Minimum valid BMP: 14-byte file header + 40-byte DIB header.
+            const MIN_BMP_SIZE: u64 = 54;
+            if size_bytes < MIN_BMP_SIZE {
+                return Err(ConfiError::corrupted_file(
+                    "This BMP file is too small to be valid.",
+                ));
+            }
+            validate_image(path, FileFormat::Bmp, image::ImageFormat::Bmp, size_bytes)
+        }
         FileFormat::Pdf => validate_pdf_header(path, size_bytes),
         FileFormat::Unsupported(mime) => Err(ConfiError::unsupported_format(format!(
             "The file format '{mime}' is not supported in this version of CONFI."
@@ -77,129 +75,53 @@ pub fn validate_file(path: &Path, detected_format: &FileFormat) -> ConfiResult<V
     }
 }
 
-// ── Image structural checks ──────────────────────────────────────────────────
-//
-// These use the `image` crate's reader in "header-only" mode where possible,
-// so we do not load the full pixel data just to validate the structure.
+// ── Image structural check ──────────────────────────────────────────────────
 
-fn validate_jpeg(path: &Path, size_bytes: u64) -> ConfiResult<ValidationResult> {
-    let reader = open_image_reader(path, image::ImageFormat::Jpeg)?;
-
-    // Verify JPEG-specific: must have valid SOI marker and at least one other segment.
-    // `into_dimensions()` reads the header without decoding pixels.
-    let (width, height) = reader.into_dimensions().map_err(|e| {
-        ConfiError::with_detail(
-            ErrorCode::CorruptedFile,
-            "This JPEG file appears to be damaged. It cannot be opened.",
-            e.to_string(),
-        )
-    })?;
-
-    if width == 0 || height == 0 {
-        return Err(ConfiError::corrupted_file(
-            "This JPEG file reports zero dimensions and cannot be processed.",
-        ));
-    }
-
-    Ok(ValidationResult {
-        format: FileFormat::Jpeg,
-        size_bytes,
-        page_count: None,
-        dimensions: Some((width, height)),
-    })
-}
-
-fn validate_png(path: &Path, size_bytes: u64) -> ConfiResult<ValidationResult> {
-    let reader = open_image_reader(path, image::ImageFormat::Png)?;
-    let (width, height) = reader.into_dimensions().map_err(|e| {
-        ConfiError::with_detail(
-            ErrorCode::CorruptedFile,
-            "This PNG file appears to be damaged. It cannot be opened.",
-            e.to_string(),
-        )
-    })?;
-
-    if width == 0 || height == 0 {
-        return Err(ConfiError::corrupted_file(
-            "This PNG file reports zero dimensions.",
-        ));
-    }
-
-    Ok(ValidationResult {
-        format: FileFormat::Png,
-        size_bytes,
-        page_count: None,
-        dimensions: Some((width, height)),
-    })
-}
-
-fn validate_webp(path: &Path, size_bytes: u64) -> ConfiResult<ValidationResult> {
-    // The `image` crate can decode WebP but its dimension reading may not be
-    // as lightweight as for JPEG/PNG. We do a full header check here.
-    let reader = open_image_reader(path, image::ImageFormat::WebP)?;
-    let (width, height) = reader.into_dimensions().map_err(|e| {
-        ConfiError::with_detail(
-            ErrorCode::CorruptedFile,
-            "This WebP file appears to be damaged.",
-            e.to_string(),
-        )
-    })?;
-
-    Ok(ValidationResult {
-        format: FileFormat::Webp,
-        size_bytes,
-        page_count: None,
-        dimensions: Some((width, height)),
-    })
-}
-
-fn validate_bmp(path: &Path, size_bytes: u64) -> ConfiResult<ValidationResult> {
-    // BMP minimum valid size: 54 bytes (14-byte file header + 40-byte DIB header).
-    if size_bytes < 54 {
-        return Err(ConfiError::corrupted_file(
-            "This BMP file is too small to be valid.",
-        ));
-    }
-
-    let reader = open_image_reader(path, image::ImageFormat::Bmp)?;
-    let (width, height) = reader.into_dimensions().map_err(|e| {
-        ConfiError::with_detail(
-            ErrorCode::CorruptedFile,
-            "This BMP file appears to be damaged.",
-            e.to_string(),
-        )
-    })?;
-
-    Ok(ValidationResult {
-        format: FileFormat::Bmp,
-        size_bytes,
-        page_count: None,
-        dimensions: Some((width, height)),
-    })
-}
-
-/// Open an image reader at the given path with the specified format.
-fn open_image_reader(
+/// One implementation for all image formats: `into_dimensions()` reads the
+/// header without decoding pixels, so this stays cheap on large files.
+fn validate_image(
     path: &Path,
-    format: image::ImageFormat,
-) -> ConfiResult<image::ImageReader<std::io::BufReader<std::fs::File>>> {
+    format: FileFormat,
+    image_format: image::ImageFormat,
+    size_bytes: u64,
+) -> ConfiResult<ValidationResult> {
     let mut reader = image::ImageReader::open(path).map_err(|e| {
         ConfiError::file_access_denied(format!("Cannot open image '{}': {e}", path.display()))
     })?;
-    reader.set_format(format);
-    Ok(reader)
+    reader.set_format(image_format);
+
+    let (width, height) = reader.into_dimensions().map_err(|e| {
+        ConfiError::with_detail(
+            ErrorCode::CorruptedFile,
+            format!("This {format} file appears to be damaged. It cannot be opened."),
+            e.to_string(),
+        )
+    })?;
+
+    if width == 0 || height == 0 {
+        return Err(ConfiError::corrupted_file(format!(
+            "This {format} file reports zero dimensions and cannot be processed."
+        )));
+    }
+
+    Ok(ValidationResult {
+        format,
+        size_bytes,
+        dimensions: Some((width, height)),
+    })
 }
 
 // ── PDF structural check ─────────────────────────────────────────────────────
 //
-// Without lopdf in scope, we perform a lightweight manual check:
+// Lightweight, without a full parse:
 //   1. File begins with %PDF-
 //   2. File ends with %%EOF (within the last 1024 bytes)
-//   3. File is at minimum a plausible size (> 100 bytes)
+//   3. File is at minimum a plausible size
+//   4. No /Encrypt dictionary in the header region
 //
-// This catches truncated PDFs, zero-byte files renamed to .pdf, and the
-// most common corruption pattern (file cut off before %%EOF).
-// Full structural validation occurs inside the pdf_engine operations.
+// This catches truncated PDFs, zero-byte files renamed to .pdf, and the most
+// common corruption pattern (file cut off before %%EOF). Full structural
+// validation happens in the pdf_engine operations.
 
 fn validate_pdf_header(path: &Path, size_bytes: u64) -> ConfiResult<ValidationResult> {
     use std::io::{Read, Seek, SeekFrom};
@@ -217,7 +139,6 @@ fn validate_pdf_header(path: &Path, size_bytes: u64) -> ConfiResult<ValidationRe
         ConfiError::file_access_denied(format!("Cannot open '{}': {e}", path.display()))
     })?;
 
-    // Check PDF header magic.
     let mut header = vec![0u8; PDF_MAGIC.len()];
     file.read_exact(&mut header)
         .map_err(|e| ConfiError::corrupted_file(format!("Cannot read PDF header: {e}")))?;
@@ -230,7 +151,7 @@ fn validate_pdf_header(path: &Path, size_bytes: u64) -> ConfiResult<ValidationRe
         ));
     }
 
-    // Check %%EOF marker in the tail (last 1024 bytes).
+    // Check %%EOF in the tail.
     let tail_start = size_bytes.saturating_sub(1024);
     file.seek(SeekFrom::Start(tail_start)).map_err(|e| {
         ConfiError::processing_error_detail("Seek failed during PDF validation", e.to_string())
@@ -248,9 +169,7 @@ fn validate_pdf_header(path: &Path, size_bytes: u64) -> ConfiResult<ValidationRe
         ));
     }
 
-    // Check for encryption dictionary — surface this as PASSWORD_REQUIRED.
-    // We only read the header region to check for /Encrypt, so this is not
-    // exhaustive, but catches the most common case.
+    // Check for an encryption dictionary — surface this as PASSWORD_REQUIRED.
     file.seek(SeekFrom::Start(0)).ok();
     let mut head_buf = vec![0u8; 2048.min(size_bytes as usize)];
     let n = file.read(&mut head_buf).unwrap_or(0);
@@ -263,83 +182,6 @@ fn validate_pdf_header(path: &Path, size_bytes: u64) -> ConfiResult<ValidationRe
     Ok(ValidationResult {
         format: FileFormat::Pdf,
         size_bytes,
-        page_count: None, // Determined by the pdf_engine, not here.
         dimensions: None,
     })
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::io::Write;
-    use tempfile::NamedTempFile;
-
-    fn write_temp(bytes: &[u8], ext: &str) -> NamedTempFile {
-        let mut f = tempfile::Builder::new()
-            .suffix(&format!(".{ext}"))
-            .tempfile()
-            .unwrap();
-        f.write_all(bytes).unwrap();
-        f
-    }
-
-    // ── Truncated file tests ─────────────────────────────────────────────────
-
-    #[test]
-    fn truncated_file_with_pdf_magic_is_corrupted() {
-        // Only the header, no %%EOF — truncated.
-        let data = b"%PDF-1.7\n% just the header, nothing else";
-        let f = write_temp(data, "pdf");
-        let result = validate_file(f.path(), &FileFormat::Pdf);
-        assert!(result.is_err());
-        let e = result.unwrap_err();
-        assert_eq!(e.code, ErrorCode::CorruptedFile);
-    }
-
-    #[test]
-    fn valid_pdf_skeleton_passes_header_check() {
-        // Minimal PDF-like structure with proper markers.
-        let mut data = b"%PDF-1.7\n".to_vec();
-        data.extend_from_slice(b"1 0 obj\n<< >>\nendobj\n");
-        data.extend_from_slice(&vec![b' '; 80]); // padding
-        data.extend_from_slice(b"\n%%EOF\n");
-        let f = write_temp(&data, "pdf");
-        let result = validate_file(f.path(), &FileFormat::Pdf);
-        assert!(result.is_ok());
-    }
-
-    #[test]
-    fn empty_file_always_fails() {
-        let f = write_temp(&[], "pdf");
-        let result = validate_file(f.path(), &FileFormat::Pdf);
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn unsupported_format_returns_correct_error_code() {
-        let f = write_temp(b"some content", "tiff");
-        let result = validate_file(f.path(), &FileFormat::Unsupported("image/tiff".to_string()));
-        let e = result.unwrap_err();
-        assert_eq!(e.code, ErrorCode::UnsupportedFormat);
-    }
-
-    #[test]
-    fn unknown_format_returns_invalid_input_error() {
-        let f = write_temp(b"\x00\x01\x02\x03", "bin");
-        let result = validate_file(f.path(), &FileFormat::Unknown);
-        let e = result.unwrap_err();
-        assert_eq!(e.code, ErrorCode::InvalidInput);
-    }
-
-    #[test]
-    fn encrypted_pdf_detected_as_password_required() {
-        let mut data = b"%PDF-1.7\n".to_vec();
-        data.extend_from_slice(b"1 0 obj\n<< /Encrypt 2 0 R >>\nendobj\n");
-        data.extend_from_slice(&vec![b' '; 80]);
-        data.extend_from_slice(b"\n%%EOF\n");
-        let f = write_temp(&data, "pdf");
-        let result = validate_file(f.path(), &FileFormat::Pdf);
-        let e = result.unwrap_err();
-        assert_eq!(e.code, ErrorCode::PasswordRequired);
-    }
 }

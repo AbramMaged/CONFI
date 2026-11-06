@@ -93,9 +93,9 @@ Test-Case "1. Single PDF selection" {
 # ── Test 2: Two PDF selection ─────────────────────────────────────────────────
 
 Test-Case "2. Two PDF selection (merge)" {
-    $output = & $shellExe --action merge_pdf --files $pdfFile $pdfFile2 2>&1
+    $output = & $shellExe --action merge --files $pdfFile $pdfFile2 2>&1
     $json = $output | Where-Object { $_ -match '"operation"' } | Out-String
-    if (-not $json.Contains('"merge_pdf"')) { throw "Expected operation 'merge_pdf'" }
+    if (-not $json.Contains('"merge"')) { throw "Expected operation 'merge'" }
     # Both files should be present
     $fileCount = ([regex]::Matches($json, '\.pdf')).Count
     if ($fileCount -lt 2) { throw "Expected 2 file paths, found $fileCount" }
@@ -104,7 +104,7 @@ Test-Case "2. Two PDF selection (merge)" {
 # ── Test 3: Five PDF selection ────────────────────────────────────────────────
 
 Test-Case "3. Five PDF selection" {
-    $output = & $shellExe --action merge_pdf --files $pdfFile $pdfFile2 $pdfFile3 $pdfFile4 $pdfFile5 2>&1
+    $output = & $shellExe --action merge --files $pdfFile $pdfFile2 $pdfFile3 $pdfFile4 $pdfFile5 2>&1
     $json = $output | Where-Object { $_ -match '"files"' } | Out-String
     $fileCount = ([regex]::Matches($json, '\.pdf')).Count
     if ($fileCount -lt 5) { throw "Expected 5 file paths, found $fileCount" }
@@ -130,7 +130,7 @@ Test-Case "5. Paths containing non-ASCII characters" {
 # ── Test 6: No missing or duplicated selected paths ──────────────────────────
 
 Test-Case "6. No duplicated paths" {
-    $output = & $shellExe --action merge_pdf --files $pdfFile $pdfFile2 2>&1
+    $output = & $shellExe --action merge --files $pdfFile $pdfFile2 2>&1
     $stdout = $output | Where-Object { $_ -notmatch '═' -and $_ -notmatch '^\s*$' -and $_ -notmatch 'File \d' -and $_ -match '"' } | Out-String
     # Check JSON output for exactly 2 files
     if ($stdout) {
@@ -142,7 +142,7 @@ Test-Case "6. No duplicated paths" {
 # ── Test 7: Correct operation identifier ──────────────────────────────────────
 
 Test-Case "7. Correct operation identifier" {
-    $operations = @("open", "compress", "convert", "split", "merge_pdf", "resize", "batch_convert", "batch_compress")
+    $operations = @("open", "compress", "convert", "split", "merge", "resize", "batch_convert", "batch_compress")
     foreach ($op in $operations) {
         $output = & $shellExe --action $op --files $pdfFile 2>&1
         $json = $output | Where-Object { $_ -match '"operation"' } | Out-String
@@ -172,7 +172,7 @@ Test-Case "9. No valid files (deleted file)" {
 
 Test-Case "10. Mixed valid and invalid files" {
     $deletedFile = Join-Path $testDir "gone.pdf"
-    $output = & $shellExe --action merge_pdf --files $pdfFile $deletedFile $pdfFile2 2>&1
+    $output = & $shellExe --action merge --files $pdfFile $deletedFile $pdfFile2 2>&1
     $stderr = ($output | Out-String)
     # Should report the error for the missing file but still process the valid ones.
     if (-not $stderr.Contains("Valid files")) { throw "Expected valid file count report" }

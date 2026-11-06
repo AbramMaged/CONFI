@@ -12,15 +12,12 @@ crate-type = ["lib"]
 [dependencies]
 # Serialization
 serde = { workspace = true }
-serde_json = { workspace = true }
 
 # Error handling
 thiserror = { workspace = true }
 
 # Utilities
 uuid = { workspace = true }
-chrono = { workspace = true }
-log = { workspace = true }
 
 # File type detection via magic bytes (MIT)
 infer = "0.16"
@@ -56,3 +53,4 @@ webp-encode = ["dep:webp"]
 [dev-dependencies]
 tempfile = "3"
 pretty_assertions = "1"
+serde_json = { workspace = true }

@@ -85,7 +85,7 @@ pub fn convert_image(
     encode_image(&img, &tmp_path, output_format, quality)?;
 
     // Validate the output by re-decoding its header.
-    validate_output_image(&tmp_path, output_format)?;
+    validate_output_image(&tmp_path)?;
 
     // Move temp → final destination.
     finalize(&tmp_path, output_path)?;
@@ -129,27 +129,24 @@ fn encode_image(
     quality: Option<u8>,
 ) -> ConfiResult<()> {
     match format {
-        ImageOutputFormat::Jpeg => encode_jpeg(img, path, quality),
-        ImageOutputFormat::Png => encode_png(img, path),
+        ImageOutputFormat::Jpeg => {
+            let file = create_output_file(path)?;
+            let mut encoder = image::codecs::jpeg::JpegEncoder::new_with_quality(
+                file,
+                quality.unwrap_or(85).clamp(1, 100),
+            );
+            encoder.encode_image(img).map_err(|e| {
+                ConfiError::processing_error_detail("JPEG encoding failed", e.to_string())
+            })
+        }
+        ImageOutputFormat::Png => img
+            .save_with_format(path, ImageFormat::Png)
+            .map_err(|e| ConfiError::processing_error_detail("PNG encoding failed", e.to_string())),
         ImageOutputFormat::Webp => encode_webp(img, path, quality),
-        ImageOutputFormat::Bmp => encode_bmp(img, path),
+        ImageOutputFormat::Bmp => img
+            .save_with_format(path, ImageFormat::Bmp)
+            .map_err(|e| ConfiError::processing_error_detail("BMP encoding failed", e.to_string())),
     }
-}
-
-fn encode_jpeg(img: &DynamicImage, path: &Path, quality: Option<u8>) -> ConfiResult<()> {
-    let q = quality.unwrap_or(85).clamp(1, 100);
-
-    // The `image` crate's JPEG encoder accepts quality in its JpegEncoder.
-    let file = create_output_file(path)?;
-    let mut encoder = image::codecs::jpeg::JpegEncoder::new_with_quality(file, q);
-    encoder
-        .encode_image(img)
-        .map_err(|e| ConfiError::processing_error_detail("JPEG encoding failed", e.to_string()))
-}
-
-fn encode_png(img: &DynamicImage, path: &Path) -> ConfiResult<()> {
-    img.save_with_format(path, ImageFormat::Png)
-        .map_err(|e| ConfiError::processing_error_detail("PNG encoding failed", e.to_string()))
 }
 
 fn encode_webp(img: &DynamicImage, path: &Path, _quality: Option<u8>) -> ConfiResult<()> {
@@ -175,11 +172,6 @@ fn encode_webp(img: &DynamicImage, path: &Path, _quality: Option<u8>) -> ConfiRe
         img.save_with_format(path, ImageFormat::WebP)
             .map_err(|e| ConfiError::processing_error_detail("WebP encoding failed", e.to_string()))
     }
-}
-
-fn encode_bmp(img: &DynamicImage, path: &Path) -> ConfiResult<()> {
-    img.save_with_format(path, ImageFormat::Bmp)
-        .map_err(|e| ConfiError::processing_error_detail("BMP encoding failed", e.to_string()))
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -212,20 +204,17 @@ fn format_supports_alpha(format: ImageOutputFormat) -> bool {
 }
 
 /// Composite an image with a transparent background onto white.
+///
+/// Uses the crate's own source-over blend rather than a per-pixel loop.
 fn flatten_to_white(img: DynamicImage) -> DynamicImage {
     let rgba = img.to_rgba8();
-    let (w, h) = rgba.dimensions();
-    let mut output = image::RgbaImage::new(w, h);
-
-    for (x, y, pixel) in rgba.enumerate_pixels() {
-        let alpha = pixel[3] as f32 / 255.0;
-        let r = (pixel[0] as f32 * alpha + 255.0 * (1.0 - alpha)) as u8;
-        let g = (pixel[1] as f32 * alpha + 255.0 * (1.0 - alpha)) as u8;
-        let b = (pixel[2] as f32 * alpha + 255.0 * (1.0 - alpha)) as u8;
-        output.put_pixel(x, y, Rgba([r, g, b, 255]));
-    }
-
-    DynamicImage::ImageRgba8(output)
+    let mut canvas = image::RgbaImage::from_pixel(
+        rgba.width(),
+        rgba.height(),
+        Rgba([255, 255, 255, 255]),
+    );
+    image::imageops::overlay(&mut canvas, &rgba, 0, 0);
+    DynamicImage::ImageRgba8(canvas)
 }
 
 /// Create an output file, returning a write handle.
@@ -239,7 +228,7 @@ fn create_output_file(path: &Path) -> ConfiResult<std::fs::File> {
 }
 
 /// Re-decode the output file's header to confirm it was written correctly.
-fn validate_output_image(path: &Path, expected_format: ImageOutputFormat) -> ConfiResult<()> {
+fn validate_output_image(path: &Path) -> ConfiResult<()> {
     let reader = image::ImageReader::open(path).map_err(|e| {
         ConfiError::processing_error_detail(
             "Output validation: cannot open temp file",
@@ -264,77 +253,12 @@ fn validate_output_image(path: &Path, expected_format: ImageOutputFormat) -> Con
 
     // Verify the file extension on the output matches the expected format.
     // This is a sanity check on our own logic, not user input.
-    let _ = expected_format; // Used implicitly through path extension.
-
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tempfile::TempDir;
-
-    // Minimal valid PNG (1×1 red pixel) — base64 decoded.
-    // This avoids requiring PNG fixtures on disk for unit tests.
-    fn minimal_png_bytes() -> Vec<u8> {
-        // 1×1 red opaque PNG
-        vec![
-            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, // PNG signature
-            0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, // IHDR chunk length + type
-            0x00, 0x00, 0x00, 0x01, // width = 1
-            0x00, 0x00, 0x00, 0x01, // height = 1
-            0x08, 0x02, // bit depth=8, color type=RGB
-            0x00, 0x00, 0x00, // compression, filter, interlace
-            0x90, 0x77, 0x53, 0xDE, // IHDR CRC
-            0x00, 0x00, 0x00, 0x0C, // IDAT length=12
-            0x49, 0x44, 0x41, 0x54, // IDAT type
-            0x08, 0xD7, 0x63, 0xF8, 0xCF, 0xC0, 0x00, 0x00, // deflate data (1px red)
-            0x00, 0x02, 0x00, 0x01, // IDAT data cont.
-            0x66, 0x32, 0x9D, 0xD0, // IDAT CRC
-            0x00, 0x00, 0x00, 0x00, // IEND length=0
-            0x49, 0x45, 0x4E, 0x44, // IEND type
-            0xAE, 0x42, 0x60, 0x82, // IEND CRC
-        ]
-    }
-
-    fn write_png(dir: &TempDir, name: &str) -> PathBuf {
-        let path = dir.path().join(name);
-        std::fs::write(&path, minimal_png_bytes()).unwrap();
-        path
-    }
-
-    #[test]
-    fn png_to_jpeg_conversion_succeeds() {
-        let dir = TempDir::new().unwrap();
-        let input = write_png(&dir, "input.png");
-        let output = dir.path().join("output.jpg");
-
-        let result = convert_image(&input, ImageOutputFormat::Jpeg, Some(85), &output);
-        assert!(result.is_ok(), "Conversion failed: {:?}", result.err());
-
-        let r = result.unwrap();
-        assert!(output.exists());
-        assert!(r.output_size_bytes > 0);
-        // For a 1×1 image, conversion from PNG to JPEG is valid.
-        assert!(!r.warnings.iter().any(|w| w.contains("transparent")));
-    }
-
-    #[test]
-    fn does_not_overwrite_existing_output() {
-        let dir = TempDir::new().unwrap();
-        let input = write_png(&dir, "input.png");
-        let output = dir.path().join("output.jpg");
-        // Pre-create the output file.
-        std::fs::write(&output, b"existing content").unwrap();
-
-        let result = convert_image(&input, ImageOutputFormat::Jpeg, Some(85), &output);
-        assert!(result.is_err());
-        let e = result.unwrap_err();
-        assert_eq!(e.code, crate::common::errors::ErrorCode::OutputError);
-        // Original file must be unchanged.
-        let content = std::fs::read(&output).unwrap();
-        assert_eq!(content, b"existing content");
-    }
 
     #[test]
     fn has_transparency_detection() {

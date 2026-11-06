@@ -16,7 +16,7 @@ use confi_shell::client::{get_pipe_name, send_pipe_request, IpcClientError};
 use confi_shell::protocol::{
     validate_request, ConfiRequest, ConfiResponse, DEFAULT_MAX_PAYLOAD_SIZE,
 };
-use confi_shell::server::{run_pipe_server, DefaultQueueHandler};
+use confi_shell::server::run_pipe_server;
 use confi_shell::uri::build_deep_link;
 
 fn main() {
@@ -33,8 +33,7 @@ fn main() {
             #[cfg(windows)]
             {
                 let pipe_name = get_pipe_name();
-                let handler = DefaultQueueHandler;
-                if let Err(e) = run_pipe_server(&pipe_name, &handler, DEFAULT_MAX_PAYLOAD_SIZE) {
+                if let Err(e) = run_pipe_server(&pipe_name, DEFAULT_MAX_PAYLOAD_SIZE) {
                     eprintln!("Pipe server error: {e}");
                     std::process::exit(1);
                 }
@@ -123,14 +122,10 @@ fn handle_action(action: &str, files: Vec<PathBuf>) {
         let display = path.display().to_string();
         let exists = path.exists();
         let is_file = path.is_file();
-        let has_spaces = display.contains(' ');
-        let is_ascii = display.is_ascii();
 
         eprintln!("  File {}: {}", i + 1, display);
-        eprintln!("    exists:     {exists}");
-        eprintln!("    is_file:    {is_file}");
-        eprintln!("    has_spaces: {has_spaces}");
-        eprintln!("    all_ascii:  {is_ascii}");
+        eprintln!("    exists:  {exists}");
+        eprintln!("    is_file: {is_file}");
 
         if !exists {
             errors.push(format!("File not found: {display}"));

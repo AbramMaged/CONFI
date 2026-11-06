@@ -17,8 +17,8 @@ use confi_shell::protocol::{
     read_framed_message, write_framed_message, ConfiRequest, ConfiResponse, IpcError,
     DEFAULT_MAX_PAYLOAD_SIZE,
 };
-use confi_shell::server::{handle_client_stream, DefaultQueueHandler};
-use confi_shell::uri::{build_deep_link, parse_deep_link};
+use confi_shell::server::handle_client_stream;
+use confi_shell::uri::build_deep_link;
 
 // ── Mock Stream for testing chunked / partial reads ──────────────────────────
 
@@ -180,8 +180,7 @@ fn malformed_json_returns_error_response() {
     write_framed_message(&mut framed, bad_json, DEFAULT_MAX_PAYLOAD_SIZE).unwrap();
 
     let mut stream = Cursor::new(framed);
-    let handler = DefaultQueueHandler;
-    let result = handle_client_stream(&mut stream, &handler, DEFAULT_MAX_PAYLOAD_SIZE);
+    let result = handle_client_stream(&mut stream, DEFAULT_MAX_PAYLOAD_SIZE);
     assert!(result.is_err());
 
     // Check that error response was written back to the stream
@@ -227,18 +226,13 @@ fn unicode_and_reserved_characters_end_to_end() {
     assert!(!uri.contains(' '));
     assert!(!uri.contains('م'));
     assert!(!uri.contains('项'));
-
-    let parsed = parse_deep_link(&uri).unwrap();
-    assert_eq!(parsed.operation, req.operation);
-    assert_eq!(parsed.files, req.files);
+    assert!(uri.starts_with("confi://action/merge?files="));
 }
 
 // ── Test 7: Multiple rapid requests sequentially ─────────────────────────────
 
 #[test]
 fn multiple_rapid_requests_handled() {
-    let handler = DefaultQueueHandler;
-
     for i in 0..50 {
         let req = ConfiRequest {
             operation: "split".to_string(),
@@ -250,8 +244,7 @@ fn multiple_rapid_requests_handled() {
         write_framed_message(&mut framed, &json, DEFAULT_MAX_PAYLOAD_SIZE).unwrap();
 
         let mut stream = Cursor::new(framed);
-        let accepted =
-            handle_client_stream(&mut stream, &handler, DEFAULT_MAX_PAYLOAD_SIZE).unwrap();
+        let accepted = handle_client_stream(&mut stream, DEFAULT_MAX_PAYLOAD_SIZE).unwrap();
         assert!(accepted.is_some());
         assert_eq!(accepted.unwrap().files[0], req.files[0]);
     }

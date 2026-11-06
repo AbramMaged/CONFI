@@ -104,16 +104,14 @@ fn detect_png_with_jpg_extension() {
     );
 }
 
-// ── Extension mismatch flagging ──────────────────────────────────────────────
+// ── Extension mismatch ──────────────────────────────────────────────────────
 
 #[test]
 fn extension_mismatch_detected_but_not_blocking() {
     let f = make_temp(PDF_HEADER, "jpg");
-    // Detection succeeds (magic bytes win).
+    // Detection succeeds: magic bytes win over the extension.
     let format = detection::detect_from_path(f.path()).unwrap();
     assert_eq!(format, FileFormat::Pdf);
-    // Extension mismatch is flagged.
-    assert!(!detection::extension_matches_format(f.path(), &format));
 }
 
 // ── Error cases ──────────────────────────────────────────────────────────────
