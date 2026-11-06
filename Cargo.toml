@@ -4,6 +4,10 @@ members = [
     "core",
     "integrations/windows/confi-shell",
 ]
+# The desktop app is its own workspace: `tauri::generate_context!` needs the
+# built frontend, so keeping it out means `cargo test --workspace` stays fast
+# and independent of whether `apps/desktop/dist` exists.
+exclude = ["apps/desktop/src-tauri"]
 
 [workspace.package]
 version = "0.1.0"

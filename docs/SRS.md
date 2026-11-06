@@ -364,7 +364,7 @@ The first release is ready when:
 | M3 | PDF engine: merge, split, rotate (PoC validates library choice first) | 2 weeks | ✅ Completed |
 | M4 | PDF engine: rendering, organize, page thumbnails | 1–2 weeks | 🟡 Rendering PoC only (Windows x64 validated; Android arm64 builds, runtime untested). Organize + thumbnails pending |
 | M5 | PDF engine: compress, JPG conversion | 1–2 weeks | ⬜ |
-| M6 | Windows app: Tauri + React, navigation, design system, core operations | 2 weeks | ⬜ |
+| M6 | Windows app: Tauri + React, navigation, design system, core operations | 2 weeks | 🟡 Started: window runs, 6 operations wired to the core; batch/jobs/thumbnails pending |
 | M7 | Windows Explorer context-menu integration (core Windows requirement) | 1–2 weeks | ⬜ |
 | M8 | Android app: Kotlin/Compose + UniFFI integration | 2–3 weeks | ⬜ |
 | M9 | Cross-platform testing, optimization, release prep | 2 weeks | ⬜ |

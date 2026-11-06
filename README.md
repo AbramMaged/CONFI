@@ -71,9 +71,9 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full architecture doc
 
 ## Development Status
 
-**Current milestone:** M3 complete — the Rust core handles file detection and
-validation, image convert/compress/resize, and PDF merge/split/rotate.
-No user interface yet; M6 (Windows app) is next after PDF rendering.
+**Current milestone:** M4 rendering PoC accepted (Windows validated, Android
+cross-compiles but runtime untested); **M6 Windows app started** — a first slice runs
+and performs detection, image convert/compress/resize, and PDF merge/split/rotate.
 
 | Area | State |
 |---|---|
@@ -83,7 +83,7 @@ No user interface yet; M6 (Windows app) is next after PDF rendering.
 | `pdf_engine` — render (PDFium) | 🟡 PoC: Windows x64 validated · Android arm64 builds, runtime NOT TESTED ([report](docs/PDFIUM-POC.md)) |
 | `pdf_engine` — organize, compress, PDF↔image | ⬜ M4–M5 |
 | `job_manager` — queue, progress, cancellation | ⬜ not started |
-| Windows app (Tauri + React) | ⬜ not started |
+| Windows app (Tauri + React) | 🟡 first slice runs: file detection + 6 operations ([app](apps/desktop/README.md)) |
 | Explorer context menu | ⬜ prototype only, not registered |
 | Android app (Kotlin + Compose) | ⬜ not started |
 
