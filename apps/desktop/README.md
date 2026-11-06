@@ -28,16 +28,30 @@ npm run dev                                   # terminal 1: Vite on :1420
 cd src-tauri; cargo run                       # terminal 2: host (debug, needs Vite)
 ```
 
-## Build (release, self-contained)
+## Build a distributable
+
+Always build through the Tauri CLI. A plain `cargo build --release` **does not embed
+the frontend** — `generate_context!` then falls back to `devUrl` and the window shows
+`ERR_CONNECTION_REFUSED` for `localhost:1420`. The CLI sets the environment that makes
+the build embed `dist/`.
 
 ```powershell
 cd apps/desktop
-npm run build                                 # frontend → dist/
-cd src-tauri
-cargo build --release                         # embeds dist/, no dev server needed
+npm run tauri build
 ```
 
-The binary is `src-tauri/target/release/confi-desktop.exe`.
+Artifacts (`src-tauri/target/release/`):
+
+| Artifact | Size (v0.1.0) | Use |
+|---|---|---|
+| `confi-desktop.exe` | 5.87 MB | portable, runs anywhere with WebView2 |
+| `bundle/msi/CONFI_0.1.0_x64_en-US.msi` | 2.92 MB | Windows installer |
+| `bundle/nsis/CONFI_0.1.0_x64-setup.exe` | 1.97 MB | installer (smaller, recommended) |
+
+The first bundle build downloads WiX and NSIS from GitHub; subsequent builds are offline.
+
+Requirement on the target machine: **WebView2 runtime** (already present on Windows 10/11
+with Edge). No .NET, no Rust, no Node needed by the end user.
 
 ## What this first slice does
 
