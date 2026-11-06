@@ -13,5 +13,12 @@ dist/
 *.tmp
 .confi-tmp-*
 
+# Local AI assistant instructions
+**/AGENTS.md
+**/CLAUDE.md
+**/GEMINI.md
+**/copilot-instructions.md
+**/*.instructions.md
+
 # Local test scratch dir (workaround: Rust children cannot write the OS temp dir in this sandbox)
 /.test-tmp/
