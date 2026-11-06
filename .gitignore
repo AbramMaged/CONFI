@@ -12,3 +12,6 @@ dist/
 # Local scratch
 *.tmp
 .confi-tmp-*
+
+# Local test scratch dir (workaround: Rust children cannot write the OS temp dir in this sandbox)
+/.test-tmp/

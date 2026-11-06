@@ -85,6 +85,21 @@ fn detect_one(raw_path: &str) -> FileRow {
         .map(|n| n.to_string_lossy().into_owned())
         .unwrap_or_else(|| raw_path.to_string());
 
+    // Office documents are not magic-byte detectable as "docx"; classify them by
+    // extension and let the converter validate the contents.
+    if let Some(kind) = confi_core::office_engine::kind_of(path) {
+        let size_bytes = std::fs::metadata(path).map(|m| m.len()).unwrap_or(0);
+        return FileRow {
+            path: raw_path.to_string(),
+            name,
+            format: kind.label().to_string(),
+            size_bytes,
+            is_valid: true,
+            detail: Some("document → PDF".to_string()),
+            error: None,
+        };
+    }
+
     let format = match detection::detect_from_path(path) {
         Ok(format) => format,
         Err(error) => {
@@ -290,6 +305,19 @@ async fn rotate_pdf(input: String, degrees: u16, output: String) -> CommandResul
     .await
 }
 
+#[tauri::command]
+async fn convert_document(input: String, output: String) -> CommandResult<String> {
+    blocking(move || {
+        let outcome =
+            confi_core::office_engine::convert_to_pdf(Path::new(&input), Path::new(&output))?;
+        Ok(format!(
+            "Converted to PDF: {} page(s), {} bytes ({:?})",
+            outcome.page_count, outcome.size_bytes, outcome.backend
+        ))
+    })
+    .await
+}
+
 // ── Entry point ─────────────────────────────────────────────────────────────
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -304,7 +332,8 @@ pub fn run() {
             resize_image,
             merge_pdfs,
             split_pdf,
-            rotate_pdf
+            rotate_pdf,
+            convert_document
         ])
         .run(tauri::generate_context!())
         .expect("error while running the CONFI application");

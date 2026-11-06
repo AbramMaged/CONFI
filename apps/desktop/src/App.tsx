@@ -15,9 +15,12 @@ type FileRow = {
   error: ErrorDto | null;
 };
 
-type Operation = "merge" | "split" | "rotate" | "convert" | "compress" | "resize";
+type Operation = "convert_document" | "merge" | "split" | "rotate" | "convert" | "compress" | "resize";
+
+const OFFICE_FORMATS = ["word", "powerpoint", "excel"];
 
 const OPERATIONS: { id: Operation; label: string; needs: string }[] = [
+  { id: "convert_document", label: "Convert document to PDF", needs: "1 Word, PowerPoint or Excel file" },
   { id: "merge", label: "Merge PDFs", needs: "2 or more PDFs" },
   { id: "split", label: "Split PDF into pages", needs: "1 PDF" },
   { id: "rotate", label: "Rotate PDF pages", needs: "1 PDF" },
@@ -57,14 +60,19 @@ export default function App() {
   const [status, setStatus] = useState<{ kind: "ok" | "error"; text: string; code?: string } | null>(null);
 
   const pdfs = files.filter((f) => f.format === "pdf" && f.is_valid);
-  const images = files.filter((f) => f.format !== "pdf" && f.is_valid);
+  const images = files.filter((f) => f.format !== "pdf" && !OFFICE_FORMATS.includes(f.format) && f.is_valid);
+  const documents = files.filter((f) => OFFICE_FORMATS.includes(f.format) && f.is_valid);
 
   async function addFiles() {
     const selected = await open({
       multiple: true,
       title: "Select files",
       filters: [
-        { name: "PDF and images", extensions: ["pdf", "jpg", "jpeg", "png", "webp", "bmp"] },
+        {
+          name: "PDF, images and documents",
+          extensions: ["pdf", "jpg", "jpeg", "png", "webp", "bmp", "doc", "docx", "rtf", "odt", "txt", "ppt", "pptx", "odp", "xls", "xlsx", "ods", "csv"],
+        },
+        { name: "Documents", extensions: ["doc", "docx", "rtf", "odt", "txt", "ppt", "pptx", "odp", "xls", "xlsx", "ods", "csv"] },
         { name: "PDF", extensions: ["pdf"] },
         { name: "Images", extensions: ["jpg", "jpeg", "png", "webp", "bmp"] },
       ],
@@ -93,6 +101,8 @@ export default function App() {
     const first = files[0];
     const stem = first ? first.name.replace(/\.[^.]+$/, "") : "output";
     switch (operation) {
+      case "convert_document":
+        return `${stem}.pdf`;
       case "merge":
         return "merged.pdf";
       case "rotate":
@@ -121,7 +131,8 @@ export default function App() {
   const canRun =
     !busy &&
     output !== "" &&
-    ((operation === "merge" && pdfs.length >= 2) ||
+    ((operation === "convert_document" && documents.length === 1) ||
+      (operation === "merge" && pdfs.length >= 2) ||
       (operation === "split" && pdfs.length === 1) ||
       (operation === "rotate" && pdfs.length === 1) ||
       (["convert", "compress", "resize"].includes(operation) && images.length === 1));
@@ -132,6 +143,9 @@ export default function App() {
     try {
       let summary: string;
       switch (operation) {
+        case "convert_document":
+          summary = await invoke("convert_document", { input: documents[0].path, output });
+          break;
         case "merge":
           summary = await invoke("merge_pdfs", { inputs: pdfs.map((f) => f.path), output });
           break;

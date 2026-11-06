@@ -6,4 +6,5 @@
 pub mod common;
 pub mod file_engine;
 pub mod image_engine;
+pub mod office_engine;
 pub mod pdf_engine;
