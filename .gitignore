@@ -1,0 +1,17 @@
+# Rust build artifacts
+/target
+**/target
+
+# Native PDFium binaries — fetched, not committed (7.5 MiB win / 6.5 MiB android)
+/vendor/pdfium/
+
+# Node (Tauri frontend, when it lands)
+node_modules/
+dist/
+
+# Local scratch
+*.tmp
+.confi-tmp-*
+
+# Local test scratch dir (workaround: Rust children cannot write the OS temp dir in this sandbox)
+/.test-tmp/

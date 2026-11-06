@@ -1,0 +1,30 @@
+[workspace]
+resolver = "2"
+members = [
+    "core",
+    "integrations/windows/confi-shell",
+]
+# The desktop app is its own workspace: `tauri::generate_context!` needs the
+# built frontend, so keeping it out means `cargo test --workspace` stays fast
+# and independent of whether `apps/desktop/dist` exists.
+exclude = ["apps/desktop/src-tauri"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["CONFI"]
+license = "proprietary"
+
+[workspace.dependencies]
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Error handling
+thiserror = "1"
+anyhow = "1"
+
+# Utilities
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+log = "0.4"
