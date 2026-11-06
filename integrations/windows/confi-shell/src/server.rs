@@ -92,7 +92,8 @@ fn respond<S: std::io::Write>(
     response: ConfiResponse,
     max_payload_size: usize,
 ) -> Result<(), IpcError> {
-    let bytes = serde_json::to_vec(&response).map_err(|e| IpcError::Serialization(e.to_string()))?;
+    let bytes =
+        serde_json::to_vec(&response).map_err(|e| IpcError::Serialization(e.to_string()))?;
     write_framed_message(stream, &bytes, max_payload_size)
 }
 
@@ -103,8 +104,8 @@ pub fn run_pipe_server(pipe_name: &str, max_payload_size: usize) -> Result<(), S
     use windows::core::HSTRING;
     use windows::Win32::Storage::FileSystem::PIPE_ACCESS_DUPLEX;
     use windows::Win32::System::Pipes::{
-        ConnectNamedPipe, CreateNamedPipeW, DisconnectNamedPipe, PIPE_READMODE_BYTE, PIPE_TYPE_BYTE,
-        PIPE_WAIT,
+        ConnectNamedPipe, CreateNamedPipeW, DisconnectNamedPipe, PIPE_READMODE_BYTE,
+        PIPE_TYPE_BYTE, PIPE_WAIT,
     };
 
     let pipe_hstring = HSTRING::from(pipe_name);

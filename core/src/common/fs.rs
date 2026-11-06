@@ -19,10 +19,7 @@ use crate::common::errors::{ConfiError, ConfiResult};
 /// The name carries a random component so two jobs writing to the same
 /// destination cannot overwrite each other's temporary file.
 pub fn temp_path_for(output: &Path) -> PathBuf {
-    let stem = output
-        .file_stem()
-        .and_then(|s| s.to_str())
-        .unwrap_or("out");
+    let stem = output.file_stem().and_then(|s| s.to_str()).unwrap_or("out");
     let ext = output.extension().and_then(|e| e.to_str()).unwrap_or("tmp");
     output.with_file_name(format!(".confi-tmp-{}-{stem}.{ext}", Uuid::new_v4()))
 }

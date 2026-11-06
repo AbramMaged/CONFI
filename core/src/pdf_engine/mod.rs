@@ -110,10 +110,7 @@ pub(crate) fn save_tmp(mut doc: Document, output: &Path) -> ConfiResult<PathBuf>
     let tmp = temp_path_for(output);
     doc.save(&tmp).map_err(|e| {
         let _ = std::fs::remove_file(&tmp);
-        ConfiError::output_error(format!(
-            "Cannot write PDF to '{}': {e}",
-            tmp.display()
-        ))
+        ConfiError::output_error(format!("Cannot write PDF to '{}': {e}", tmp.display()))
     })?;
     Ok(tmp)
 }
@@ -153,7 +150,11 @@ pub(crate) fn finish(tmp: &Path, output: &Path, page_count: u32) -> ConfiResult<
 }
 
 /// Set a page's `/Rotate` value, accumulating with any rotation already there.
-pub(crate) fn add_rotation(doc: &mut Document, page_id: ObjectId, degrees: i64) -> ConfiResult<i64> {
+pub(crate) fn add_rotation(
+    doc: &mut Document,
+    page_id: ObjectId,
+    degrees: i64,
+) -> ConfiResult<i64> {
     let page = doc.get_dictionary_mut(page_id).map_err(|e| {
         ConfiError::processing_error_detail("Page dictionary is unreadable", e.to_string())
     })?;

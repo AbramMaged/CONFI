@@ -21,8 +21,7 @@ fn write_pdf(dir: &Path, name: &str, page_count: u32) -> PathBuf {
     let mut kids: Vec<Object> = Vec::new();
 
     for _ in 0..page_count {
-        let content_id =
-            doc.add_object(lopdf::Stream::new(Dictionary::new(), b"BT ET".to_vec()));
+        let content_id = doc.add_object(lopdf::Stream::new(Dictionary::new(), b"BT ET".to_vec()));
 
         let mut page = Dictionary::new();
         page.set("Type", Object::Name(b"Page".to_vec()));
@@ -206,7 +205,9 @@ fn split_produces_one_file_per_page() {
     for (index, result) in results.iter().enumerate() {
         assert_eq!(result.page_count, 1);
         assert!(result.output_path.exists());
-        assert!(result.output_path.ends_with(format!("document-page-{}.pdf", index + 1)));
+        assert!(result
+            .output_path
+            .ends_with(format!("document-page-{}.pdf", index + 1)));
         assert_eq!(pdf_engine::page_count(&result.output_path).unwrap(), 1);
     }
     // Source must still be intact.

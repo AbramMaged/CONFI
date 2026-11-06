@@ -80,7 +80,7 @@ No user interface yet; M6 (Windows app) is next after PDF rendering.
 | `file_engine` — detection, validation | ✅ done, tested |
 | `image_engine` — convert, compress, resize | ✅ done, tested |
 | `pdf_engine` — merge, split, rotate | ✅ done, tested |
-| `pdf_engine` — render (PDFium) | ✅ PoC validated on Windows x64 · Android NOT TESTED ([report](docs/PDFIUM-POC.md)) |
+| `pdf_engine` — render (PDFium) | 🟡 PoC: Windows x64 validated · Android arm64 builds, runtime NOT TESTED ([report](docs/PDFIUM-POC.md)) |
 | `pdf_engine` — organize, compress, PDF↔image | ⬜ M4–M5 |
 | `job_manager` — queue, progress, cancellation | ⬜ not started |
 | Windows app (Tauri + React) | ⬜ not started |

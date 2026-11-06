@@ -389,8 +389,14 @@ Rules that apply to both platform layers:
 - **Dynamically bound**: `pdfium.dll` / `libpdfium.so` is loaded at runtime from a
   caller-supplied directory. Nothing links at build time, no env var required.
 - **Bind once**, not per page (measured 6–9 ms; per-page rebinding would dominate).
-- **Not thread-safe**: PDFium instances must not be shared across threads. The core does
-  not spawn threads, so the host owns the instance and serialises access.
+- **Thread safety is provided by the binding, not by convention.** PDFium's C API is
+  not thread-safe, but `pdfium-render`'s default `thread_safe` feature wraps every
+  `FPDF_*` call in a mutex marshaller (`ThreadSafePdfiumBindings`) and declares
+  `Pdfium: Send + Sync`. Host locking is therefore unnecessary; the trade-off is that
+  concurrent renders queue on that single lock instead of running in parallel.
+- **One library per process.** `pdfium-render` holds the bindings in a process-global
+  `OnceCell`; the library is initialised by the first successful `bind_pdfium` call and
+  the path argument is ignored afterwards.
 - **Native library provenance** is pinned (PDFium 159.0.8138.0, SHA-256 verified) via
   `tools/fetch-pdfium.ps1`; measured results are in `docs/PDFIUM-POC.md`.
 
@@ -440,7 +446,19 @@ pub enum OutputTarget {
 | `webp` crate | WEBP encode/decode | Apache 2.0 | Evaluate |
 | `infer` | Magic-byte file detection | MIT | Approve |
 
-**Decision:** A technical proof of concept (Milestone 1) will validate the PDF library choice before committing to `lopdf` vs. PDFium-based solutions. The full license inventory will be written to `LICENSES/INVENTORY.md` as each dependency is confirmed.
+**Decision status (updated after the M4 PoC):**
+
+- **Structural manipulation is settled on `lopdf`** (MIT, pure Rust) for merge, split and
+  rotate. Its reliability on a real-world corpus is **not yet evaluated** — the current
+  tests use synthesised fixtures.
+- **Rasterisation is settled on PDFium** (BSD-3, prebuilt binaries, dynamically bound),
+  used only by `pdf_engine::render`. It is not a structural engine and providing it says
+  nothing about `lopdf`'s suitability or vice versa.
+- **`qpdf` remains an open decision** for structural optimisation (stream/page
+  compression). No PoC has been run, and nothing in the rendering work answers it.
+- **PDFium is not evaluated for Android on-device** — it cross-compiles, but the runtime
+  path is untested. The full licence inventory is written to `LICENSES/INVENTORY.md` as
+  each dependency is confirmed.
 
 ---
 

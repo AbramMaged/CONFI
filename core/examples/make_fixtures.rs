@@ -40,9 +40,16 @@ fn main() {
         Some(path) if path.exists() => {
             let ttf = std::fs::read(&path).expect("cannot read font file");
             let out = write(&outdir, "embedded-font.pdf", build_with_embedded_font(&ttf));
-            println!("embedded-font.pdf\t{}\tfont={}", out.display(), path.display());
+            println!(
+                "embedded-font.pdf\t{}\tfont={}",
+                out.display(),
+                path.display()
+            );
         }
-        Some(path) => eprintln!("note: font '{}' not found — skipping embedded-font fixture", path.display()),
+        Some(path) => eprintln!(
+            "note: font '{}' not found — skipping embedded-font fixture",
+            path.display()
+        ),
         None => eprintln!("note: no font argument — skipping embedded-font fixture"),
     }
 }
@@ -169,14 +176,7 @@ fn build_multipage(count: u32) -> Document {
     let mut doc = Document::with_version("1.7");
     let font = standard_font(&mut doc);
     let pages = (1..=count)
-        .map(|n| {
-            Page::text(
-                A4.0,
-                A4.1,
-                &format!("Page {n} of {count}"),
-                font.clone(),
-            )
-        })
+        .map(|n| Page::text(A4.0, A4.1, &format!("Page {n} of {count}"), font.clone()))
         .collect();
     append_pages(doc, pages)
 }
@@ -249,9 +249,8 @@ fn build_with_embedded_font(ttf: &[u8]) -> Document {
 
     let mut page = Page::text(A4.0, A4.1, "Embedded font: ABC abc 123", font);
     // Extra weight so the embedded-glyph result is unmistakably rendered.
-    page.content.extend_from_slice(
-        b"BT /F1 72 Tf 60 500 Td (CONFI) Tj ET\n0 0 0 rg 60 400 400 6 re f\n",
-    );
+    page.content
+        .extend_from_slice(b"BT /F1 72 Tf 60 500 Td (CONFI) Tj ET\n0 0 0 rg 60 400 400 6 re f\n");
 
     append_pages(doc, vec![page])
 }

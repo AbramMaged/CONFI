@@ -157,7 +157,8 @@ fn webp_compression_reports_quality_warning_when_lossy_disabled() {
     let dir = TempDir::new().unwrap();
     let input = dir.path().join("input.webp");
     let img = image::RgbImage::from_fn(10, 10, |_, _| image::Rgb([100, 150, 200]));
-    img.save_with_format(&input, image::ImageFormat::WebP).unwrap();
+    img.save_with_format(&input, image::ImageFormat::WebP)
+        .unwrap();
     let output = dir.path().join("output.webp");
 
     let r = compression::compress_image(&input, &FileFormat::Webp, Some(60), &output).unwrap();

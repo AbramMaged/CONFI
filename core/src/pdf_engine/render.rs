@@ -9,9 +9,26 @@
 // variable is required, because the caller passes the directory holding the
 // library. `bind_pdfium` is the single entry point for that.
 //
-// Threading: PDFium is not thread-safe and a `Pdfium` instance must not be
-// shared across threads. The core never spawns threads (AGENTS.md §5), so the
-// host application owns the instance and serialises access to it.
+// Threading: PDFium's C API is not thread-safe, but this crate does not expose
+// that hazard to callers. `pdfium-render`'s default `thread_safe` feature wraps
+// every FPDF_* call in a mutex marshaller (`ThreadSafePdfiumBindings`) and
+// declares `Pdfium: Send + Sync`, so concurrent calls are serialised inside the
+// crate and a `Pdfium` handle may be shared. The cost is that parallel renders
+// do not overlap: they queue on that one lock. Host applications therefore do
+// not need their own locking, but must not expect parallel speed-up from
+// sharing a single handle. Disabling `thread_safe` to get per-thread parallelism
+// is unsafe with a single library instance and is not done here.
+//
+// Library lifecycle: `pdfium-render` keeps the bindings in a process-global
+// `OnceCell`; `Pdfium::new` initialises the library once and later binds are
+// ignored (the path argument only takes effect on the first successful bind in
+// the process). Binding is therefore process-wide by construction, not merely
+// by convention. Tests that bind repeatedly rely on this documented behaviour.
+//
+// Cost note: every call re-opens the document, so PDFium re-parses its xref per
+// page. Measured share is in docs/PDFIUM-POC.md; a document-handle API is
+// deferred to M4-full so the PoC interface stays path-based like the rest of
+// the engine.
 //
 // Feature-gated behind `render` so the default build stays dependency-free.
 
@@ -19,7 +36,7 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use pdfium_render::prelude::{
-    PdfRenderConfig, PdfPageIndex, Pdfium, PdfiumError, PdfiumInternalError,
+    PdfPageIndex, PdfRenderConfig, Pdfium, PdfiumError, PdfiumInternalError,
 };
 
 use crate::common::errors::{ConfiError, ConfiResult, ErrorCode};
@@ -78,11 +95,6 @@ pub fn render_page_to_png(
     dpi: u32,
     output_path: &Path,
 ) -> ConfiResult<RenderResult> {
-    if !(72..=600).contains(&dpi) {
-        return Err(ConfiError::invalid_input(format!(
-            "DPI must be between 72 and 600, not {dpi}."
-        )));
-    }
     require_absent(output_path)?;
 
     let bitmap = render_page_rgba(pdfium, input_path, page_number, dpi)?;
@@ -93,10 +105,30 @@ pub fn render_page_to_png(
     })?;
 
     let tmp_path = temp_path_for(output_path);
-    image.save_with_format(&tmp_path, image::ImageFormat::Png).map_err(|e| {
+    image
+        .save_with_format(&tmp_path, image::ImageFormat::Png)
+        .map_err(|e| {
+            let _ = std::fs::remove_file(&tmp_path);
+            ConfiError::processing_error_detail("Failed to encode the rendered page", e.to_string())
+        })?;
+
+    // Validate before the file reaches the destination: reopen the written PNG's
+    // header and confirm the pixels survived encoding. Same rule as the image
+    // engine — a failed validation deletes the temp file and reports an error.
+    let (written_w, written_h) = image::image_dimensions(&tmp_path).map_err(|e| {
         let _ = std::fs::remove_file(&tmp_path);
-        ConfiError::processing_error_detail("Failed to encode the rendered page", e.to_string())
+        ConfiError::processing_error_detail(
+            "Output validation failed: the rendered PNG could not be re-read. The output has been discarded.",
+            e.to_string(),
+        )
     })?;
+    if (written_w, written_h) != (width, height) {
+        let _ = std::fs::remove_file(&tmp_path);
+        return Err(ConfiError::processing_error(format!(
+            "Output validation failed: expected {width}×{height} pixels, the PNG reports \
+             {written_w}×{written_h}. The output has been discarded."
+        )));
+    }
 
     finalize(&tmp_path, output_path)?;
 
@@ -117,6 +149,14 @@ pub fn render_page_rgba(
     page_number: u32,
     dpi: u32,
 ) -> ConfiResult<RgbaBitmap> {
+    // Validated here, at the single shared entry point, so a direct caller of
+    // render_page_rgba cannot ask for a 576,000 dpi bitmap.
+    if !(72..=600).contains(&dpi) {
+        return Err(ConfiError::invalid_input(format!(
+            "DPI must be between 72 and 600, not {dpi}."
+        )));
+    }
+
     let started = Instant::now();
 
     let document = pdfium
@@ -136,22 +176,51 @@ pub fn render_page_rgba(
         .get((page_number - 1) as PdfPageIndex)
         .map_err(|e| map_load_error(e, input_path))?;
 
+    // Refuse a request that would allocate an unreasonable bitmap *before*
+    // PDFium allocates it. The page size already accounts for /Rotate, so this
+    // measures the same rectangle PDFium is about to fill.
+    // ponytail: fixed 100 Mpixel budget (~400 MB RGBA); raise it if poster-size
+    // output is ever required.
+    const MAX_PIXELS: u64 = 100_000_000;
+    let scale = dpi as f64 / 72.0;
+    let wanted_w = (page.width().value as f64 * scale).ceil().max(0.0) as u64;
+    let wanted_h = (page.height().value as f64 * scale).ceil().max(0.0) as u64;
+    if wanted_w.saturating_mul(wanted_h) > MAX_PIXELS {
+        return Err(ConfiError::invalid_input(format!(
+            "Rendering page {page_number} at {dpi} dpi would produce {wanted_w}×{wanted_h} pixels, \
+             above the {MAX_PIXELS} pixel budget. Lower the DPI."
+        )));
+    }
+
     // 72 pt = 1 inch, so dpi/72 is the scale factor. PDFium applies the page's
     // /Rotate and /CropBox internally, which is why rotated pages come out
     // upright here without any extra handling.
-    let config = PdfRenderConfig::new().scale_page_by_factor(dpi as f32 / 72.0);
+    let config = PdfRenderConfig::new().scale_page_by_factor(scale as f32);
 
     let bitmap = page
         .render_with_config(&config)
         .map_err(|e| map_load_error(e, input_path))?;
 
-    let width = bitmap.width() as u32;
-    let height = bitmap.height() as u32;
+    // `Pixels` is i32; a negative value would wrap under `as u32`.
+    let width = u32::try_from(bitmap.width())
+        .map_err(|_| ConfiError::processing_error("PDFium reported a negative bitmap width."))?;
+    let height = u32::try_from(bitmap.height())
+        .map_err(|_| ConfiError::processing_error("PDFium reported a negative bitmap height."))?;
     let rgba = bitmap.as_rgba_bytes();
 
     let elapsed = started.elapsed();
 
-    if rgba.len() < (width as usize * height as usize * 4) {
+    // Overflow-checked: on a 32-bit target `width * height * 4` can exceed usize.
+    let expected_bytes = (width as usize)
+        .checked_mul(height as usize)
+        .and_then(|pixels| pixels.checked_mul(4))
+        .ok_or_else(|| {
+            ConfiError::processing_error(format!(
+                "Rendered bitmap size {width}×{height} overflows this platform's address space."
+            ))
+        })?;
+
+    if rgba.len() < expected_bytes {
         return Err(ConfiError::processing_error(
             "PDFium returned fewer bytes than the reported bitmap size.",
         ));
@@ -168,13 +237,17 @@ pub fn render_page_rgba(
 /// Page dimensions in PDF points (1/72 inch), as PDFium reports them —
 /// already accounting for /Rotate.
 pub fn page_size(pdfium: &Pdfium, input_path: &Path, page_number: u32) -> ConfiResult<(f32, f32)> {
+    if page_number == 0 {
+        return Err(ConfiError::invalid_input("Page numbers start at 1."));
+    }
+
     let document = pdfium
         .load_pdf_from_file(input_path, None)
         .map_err(|e| map_load_error(e, input_path))?;
 
     let pages = document.pages();
     let page = pages
-        .get((page_number.saturating_sub(1)) as PdfPageIndex)
+        .get((page_number - 1) as PdfPageIndex)
         .map_err(|e| map_load_error(e, input_path))?;
 
     Ok((page.width().value, page.height().value))

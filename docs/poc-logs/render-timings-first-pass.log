@@ -1,0 +1,245 @@
+﻿CONFI M4 PDFium PoC (Windows x64) 2026-11-06T17:55:40.5943672+02:00
+
+### multipage-5 @150 fixture=multipage-5.pdf exit=0
+BIND ok bind_ms=6.37 library_dir=C:\work\projects\CONFI\vendor\pdfium\win-x64\bin
+DOC ok pages=5 open_ms=0.49 dpi=150 file=C:\Users\berom\AppData\Local\Temp\dsh-Tes8tP\confi-m4-poc\fixtures\multipage-5.pdf
+PAGE 1 ok 1240x1754 bytes=68151 render_ms=7.00 wall_ms=12.71 reopened=1240x1754 png=true non_white=0.0863 distinct_colors=262
+PAGE 3 ok 1240x1754 bytes=69794 render_ms=4.82 wall_ms=10.22 reopened=1240x1754 png=true non_white=0.0864 distinct_colors=262
+PAGE 5 ok 1240x1754 bytes=69505 render_ms=5.88 wall_ms=10.46 reopened=1240x1754 png=true non_white=0.0865 distinct_colors=262
+SUMMARY pages_rendered=3 failures=0 total_ms=33.38 mean_ms=11.13 peak_working_set_mb=27.3 outdir=C:\Users\berom\AppData\Local\Temp\dsh-Tes8tP\confi-m4-poc\renders-175540
+
+### rotated @150 fixture=rotated.pdf exit=0
+BIND ok bind_ms=9.39 library_dir=C:\work\projects\CONFI\vendor\pdfium\win-x64\bin
+DOC ok pages=3 open_ms=0.49 dpi=150 file=C:\Users\berom\AppData\Local\Temp\dsh-Tes8tP\confi-m4-poc\fixtures\rotated.pdf
+PAGE 1 ok 1240x1754 bytes=70492 render_ms=6.65 wall_ms=11.40 reopened=1240x1754 png=true non_white=0.0873 distinct_colors=262
+PAGE 2 ok 1754x1240 bytes=69366 render_ms=4.35 wall_ms=9.97 reopened=1754x1240 png=true non_white=0.0867 distinct_colors=264
+PAGE 3 ok 1754x1240 bytes=69893 render_ms=4.89 wall_ms=10.98 reopened=1754x1240 png=true non_white=0.0870 distinct_colors=262
+SUMMARY pages_rendered=3 failures=0 total_ms=32.36 mean_ms=10.79 peak_working_set_mb=27.3 outdir=C:\Users\berom\AppData\Local\Temp\dsh-Tes8tP\confi-m4-poc\renders-175540
+
+### mixed-sizes @150 fixture=mixed-sizes.pdf exit=0
+BIND ok bind_ms=6.19 library_dir=C:\work\projects\CONFI\vendor\pdfium\win-x64\bin
+DOC ok pages=5 open_ms=0.37 dpi=150 file=C:\Users\berom\AppData\Local\Temp\dsh-Tes8tP\confi-m4-poc\fixtures\mixed-sizes.pdf
+PAGE 1 ok 1240x1754 bytes=66923 render_ms=7.58 wall_ms=12.91 reopened=1240x1754 png=true non_white=0.0863 distinct_colors=262
+PAGE 2 ok 1275x1650 bytes=65072 render_ms=4.46 wall_ms=9.31 reopened=1275x1650 png=true non_white=0.0905 distinct_colors=262
+PAGE 3 ok 1754x2481 bytes=112413 render_ms=7.67 wall_ms=14.46 reopened=1754x2481 png=true non_white=0.0601 distinct_colors=262
+PAGE 4 ok 625x833 bytes=40963 render_ms=2.90 wall_ms=6.54 reopened=625x833 png=true non_white=0.1953 distinct_colors=263
+PAGE 5 ok 1754x1240 bytes=70823 render_ms=4.02 wall_ms=8.74 reopened=1754x1240 png=true non_white=0.1164 distinct_colors=264
+SUMMARY pages_rendered=5 failures=0 total_ms=51.97 mean_ms=10.39 peak_working_set_mb=43.8 outdir=C:\Users\berom\AppData\Local\Temp\dsh-Tes8tP\confi-m4-poc\renders-175540
+
+### embedded-font @150 fixture=embedded-font.pdf exit=0
+BIND ok bind_ms=6.27 library_dir=C:\work\projects\CONFI\vendor\pdfium\win-x64\bin
+DOC ok pages=1 open_ms=0.31 dpi=150 file=C:\Users\berom\AppData\Local\Temp\dsh-Tes8tP\confi-m4-poc\fixtures\embedded-font.pdf
+PAGE 1 ok 1240x1754 bytes=92576 render_ms=4.93 wall_ms=10.05 reopened=1240x1754 png=true non_white=0.1030 distinct_colors=262
+SUMMARY pages_rendered=1 failures=0 total_ms=10.05 mean_ms=10.05 peak_working_set_mb=27.1 outdir=C:\Users\berom\AppData\Local\Temp\dsh-Tes8tP\confi-m4-poc\renders-175540
+
+### scanned @150 fixture=scanned.pdf exit=0
+BIND ok bind_ms=6.95 library_dir=C:\work\projects\CONFI\vendor\pdfium\win-x64\bin
+DOC ok pages=2 open_ms=0.34 dpi=150 file=C:\Users\berom\AppData\Local\Temp\dsh-Tes8tP\confi-m4-poc\fixtures\scanned.pdf
+PAGE 1 ok 1240x1754 bytes=57244 render_ms=11.19 wall_ms=16.23 reopened=1240x1754 png=true non_white=1.0000 distinct_colors=1344
+PAGE 2 ok 1240x1754 bytes=57245 render_ms=10.70 wall_ms=15.41 reopened=1240x1754 png=true non_white=1.0000 distinct_colors=1343
+SUMMARY pages_rendered=2 failures=0 total_ms=31.63 mean_ms=15.82 peak_working_set_mb=30.0 outdir=C:\Users\berom\AppData\Local\Temp\dsh-Tes8tP\confi-m4-poc\renders-175540
+
+### large-200 @96 fixture=large-200.pdf exit=0
+BIND ok bind_ms=6.52 library_dir=C:\work\projects\CONFI\vendor\pdfium\win-x64\bin
+DOC ok pages=200 open_ms=0.74 dpi=96 file=C:\Users\berom\AppData\Local\Temp\dsh-Tes8tP\confi-m4-poc\fixtures\large-200.pdf
+PAGE 1 ok 793x1123 bytes=38637 render_ms=5.11 wall_ms=9.44 reopened=793x1123 png=true non_white=0.0882 distinct_colors=253
+PAGE 2 ok 793x1123 bytes=39525 render_ms=2.92 wall_ms=6.36 reopened=793x1123 png=true non_white=0.0884 distinct_colors=253
+PAGE 3 ok 793x1123 bytes=39913 render_ms=3.70 wall_ms=8.00 reopened=793x1123 png=true non_white=0.0884 distinct_colors=253
+PAGE 4 ok 793x1123 bytes=39135 render_ms=2.63 wall_ms=6.79 reopened=793x1123 png=true non_white=0.0884 distinct_colors=253
+PAGE 5 ok 793x1123 bytes=39764 render_ms=3.08 wall_ms=5.91 reopened=793x1123 png=true non_white=0.0884 distinct_colors=253
+PAGE 6 ok 793x1123 bytes=40113 render_ms=2.52 wall_ms=6.59 reopened=793x1123 png=true non_white=0.0885 distinct_colors=253
+PAGE 7 ok 793x1123 bytes=39145 render_ms=2.80 wall_ms=6.06 reopened=793x1123 png=true non_white=0.0883 distinct_colors=253
+PAGE 8 ok 793x1123 bytes=40224 render_ms=2.68 wall_ms=7.68 reopened=793x1123 png=true non_white=0.0885 distinct_colors=253
+PAGE 9 ok 793x1123 bytes=40109 render_ms=2.78 wall_ms=5.88 reopened=793x1123 png=true non_white=0.0885 distinct_colors=253
+PAGE 10 ok 793x1123 bytes=40099 render_ms=2.80 wall_ms=6.30 reopened=793x1123 png=true non_white=0.0887 distinct_colors=253
+PAGE 11 ok 793x1123 bytes=38923 render_ms=2.75 wall_ms=6.40 reopened=793x1123 png=true non_white=0.0885 distinct_colors=253
+PAGE 12 ok 793x1123 bytes=39792 render_ms=2.63 wall_ms=7.28 reopened=793x1123 png=true non_white=0.0887 distinct_colors=253
+PAGE 13 ok 793x1123 bytes=40176 render_ms=2.58 wall_ms=5.92 reopened=793x1123 png=true non_white=0.0887 distinct_colors=253
+PAGE 14 ok 793x1123 bytes=39366 render_ms=3.02 wall_ms=6.02 reopened=793x1123 png=true non_white=0.0887 distinct_colors=253
+PAGE 15 ok 793x1123 bytes=40023 render_ms=2.78 wall_ms=6.28 reopened=793x1123 png=true non_white=0.0887 distinct_colors=253
+PAGE 16 ok 793x1123 bytes=40345 render_ms=2.70 wall_ms=7.01 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 17 ok 793x1123 bytes=39400 render_ms=2.85 wall_ms=6.21 reopened=793x1123 png=true non_white=0.0886 distinct_colors=253
+PAGE 18 ok 793x1123 bytes=40443 render_ms=2.99 wall_ms=6.90 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 19 ok 793x1123 bytes=40346 render_ms=2.90 wall_ms=7.70 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 20 ok 793x1123 bytes=40999 render_ms=2.91 wall_ms=6.72 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 21 ok 793x1123 bytes=39782 render_ms=2.61 wall_ms=6.16 reopened=793x1123 png=true non_white=0.0887 distinct_colors=253
+PAGE 22 ok 793x1123 bytes=40710 render_ms=2.70 wall_ms=6.98 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 23 ok 793x1123 bytes=41080 render_ms=2.96 wall_ms=5.68 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 24 ok 793x1123 bytes=40237 render_ms=2.82 wall_ms=6.35 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 25 ok 793x1123 bytes=40920 render_ms=2.80 wall_ms=6.18 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 26 ok 793x1123 bytes=41269 render_ms=3.01 wall_ms=6.86 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 27 ok 793x1123 bytes=40311 render_ms=2.85 wall_ms=6.46 reopened=793x1123 png=true non_white=0.0887 distinct_colors=253
+PAGE 28 ok 793x1123 bytes=41354 render_ms=2.75 wall_ms=6.24 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 29 ok 793x1123 bytes=41257 render_ms=4.01 wall_ms=8.18 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 30 ok 793x1123 bytes=41383 render_ms=3.22 wall_ms=6.62 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 31 ok 793x1123 bytes=40186 render_ms=2.91 wall_ms=6.00 reopened=793x1123 png=true non_white=0.0887 distinct_colors=253
+PAGE 32 ok 793x1123 bytes=41098 render_ms=2.86 wall_ms=6.05 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 33 ok 793x1123 bytes=41485 render_ms=3.10 wall_ms=6.73 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 34 ok 793x1123 bytes=40618 render_ms=2.96 wall_ms=8.70 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 35 ok 793x1123 bytes=41336 render_ms=3.11 wall_ms=8.18 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 36 ok 793x1123 bytes=41703 render_ms=2.61 wall_ms=6.68 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 37 ok 793x1123 bytes=40714 render_ms=3.72 wall_ms=7.40 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 38 ok 793x1123 bytes=41718 render_ms=3.24 wall_ms=6.79 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 39 ok 793x1123 bytes=41643 render_ms=2.70 wall_ms=5.89 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 40 ok 793x1123 bytes=40549 render_ms=2.73 wall_ms=6.42 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 41 ok 793x1123 bytes=39378 render_ms=3.04 wall_ms=8.17 reopened=793x1123 png=true non_white=0.0887 distinct_colors=253
+PAGE 42 ok 793x1123 bytes=40258 render_ms=3.02 wall_ms=6.86 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 43 ok 793x1123 bytes=40658 render_ms=2.83 wall_ms=7.00 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 44 ok 793x1123 bytes=39768 render_ms=4.41 wall_ms=7.65 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 45 ok 793x1123 bytes=40518 render_ms=3.29 wall_ms=6.31 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 46 ok 793x1123 bytes=40808 render_ms=3.20 wall_ms=6.15 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 47 ok 793x1123 bytes=39864 render_ms=3.20 wall_ms=6.34 reopened=793x1123 png=true non_white=0.0887 distinct_colors=253
+PAGE 48 ok 793x1123 bytes=40928 render_ms=2.80 wall_ms=5.91 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 49 ok 793x1123 bytes=40810 render_ms=3.03 wall_ms=6.83 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 50 ok 793x1123 bytes=41190 render_ms=2.93 wall_ms=6.10 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 51 ok 793x1123 bytes=39998 render_ms=3.78 wall_ms=6.95 reopened=793x1123 png=true non_white=0.0887 distinct_colors=253
+PAGE 52 ok 793x1123 bytes=40894 render_ms=5.56 wall_ms=10.22 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 53 ok 793x1123 bytes=41309 render_ms=2.92 wall_ms=5.85 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 54 ok 793x1123 bytes=40443 render_ms=3.20 wall_ms=6.63 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 55 ok 793x1123 bytes=41046 render_ms=2.96 wall_ms=5.97 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 56 ok 793x1123 bytes=41495 render_ms=2.70 wall_ms=5.57 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 57 ok 793x1123 bytes=40456 render_ms=2.83 wall_ms=5.31 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 58 ok 793x1123 bytes=41553 render_ms=2.79 wall_ms=6.38 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 59 ok 793x1123 bytes=41472 render_ms=3.15 wall_ms=6.17 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 60 ok 793x1123 bytes=41569 render_ms=2.96 wall_ms=5.78 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 61 ok 793x1123 bytes=40359 render_ms=3.20 wall_ms=6.76 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 62 ok 793x1123 bytes=41271 render_ms=3.13 wall_ms=6.84 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 63 ok 793x1123 bytes=41650 render_ms=3.40 wall_ms=6.73 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 64 ok 793x1123 bytes=40805 render_ms=3.36 wall_ms=6.92 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 65 ok 793x1123 bytes=41477 render_ms=2.92 wall_ms=7.11 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 66 ok 793x1123 bytes=41847 render_ms=3.01 wall_ms=6.49 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 67 ok 793x1123 bytes=40886 render_ms=2.99 wall_ms=6.60 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 68 ok 793x1123 bytes=41915 render_ms=4.88 wall_ms=18.80 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 69 ok 793x1123 bytes=41817 render_ms=3.30 wall_ms=6.76 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 70 ok 793x1123 bytes=40611 render_ms=3.15 wall_ms=5.97 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 71 ok 793x1123 bytes=39398 render_ms=3.31 wall_ms=7.07 reopened=793x1123 png=true non_white=0.0886 distinct_colors=253
+PAGE 72 ok 793x1123 bytes=40313 render_ms=4.10 wall_ms=8.43 reopened=793x1123 png=true non_white=0.0887 distinct_colors=253
+PAGE 73 ok 793x1123 bytes=40702 render_ms=3.72 wall_ms=7.44 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 74 ok 793x1123 bytes=39851 render_ms=3.42 wall_ms=7.87 reopened=793x1123 png=true non_white=0.0887 distinct_colors=253
+PAGE 75 ok 793x1123 bytes=40478 render_ms=3.50 wall_ms=6.48 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 76 ok 793x1123 bytes=40872 render_ms=3.70 wall_ms=8.11 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 77 ok 793x1123 bytes=39883 render_ms=3.68 wall_ms=7.91 reopened=793x1123 png=true non_white=0.0886 distinct_colors=253
+PAGE 78 ok 793x1123 bytes=40967 render_ms=3.27 wall_ms=6.13 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 79 ok 793x1123 bytes=40870 render_ms=3.38 wall_ms=6.47 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 80 ok 793x1123 bytes=41642 render_ms=3.54 wall_ms=7.04 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 81 ok 793x1123 bytes=40460 render_ms=4.65 wall_ms=9.76 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 82 ok 793x1123 bytes=41366 render_ms=3.31 wall_ms=6.86 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 83 ok 793x1123 bytes=41759 render_ms=3.47 wall_ms=6.97 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 84 ok 793x1123 bytes=40887 render_ms=4.16 wall_ms=8.14 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 85 ok 793x1123 bytes=41605 render_ms=3.36 wall_ms=7.05 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 86 ok 793x1123 bytes=41970 render_ms=4.34 wall_ms=8.56 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 87 ok 793x1123 bytes=40968 render_ms=4.01 wall_ms=8.52 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 88 ok 793x1123 bytes=42013 render_ms=3.46 wall_ms=6.95 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 89 ok 793x1123 bytes=41942 render_ms=3.66 wall_ms=7.89 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 90 ok 793x1123 bytes=41535 render_ms=3.47 wall_ms=6.51 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 91 ok 793x1123 bytes=40382 render_ms=3.23 wall_ms=6.45 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 92 ok 793x1123 bytes=41262 render_ms=3.17 wall_ms=6.28 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 93 ok 793x1123 bytes=41637 render_ms=3.18 wall_ms=6.32 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 94 ok 793x1123 bytes=40829 render_ms=3.06 wall_ms=8.51 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 95 ok 793x1123 bytes=41476 render_ms=7.03 wall_ms=14.95 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 96 ok 793x1123 bytes=41859 render_ms=8.53 wall_ms=15.16 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 97 ok 793x1123 bytes=40906 render_ms=7.77 wall_ms=15.83 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 98 ok 793x1123 bytes=41900 render_ms=4.59 wall_ms=8.42 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 99 ok 793x1123 bytes=41791 render_ms=3.67 wall_ms=7.64 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 100 ok 793x1123 bytes=41601 render_ms=3.86 wall_ms=7.72 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 101 ok 793x1123 bytes=40407 render_ms=4.36 wall_ms=8.09 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 102 ok 793x1123 bytes=41317 render_ms=3.98 wall_ms=7.72 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 103 ok 793x1123 bytes=41737 render_ms=3.95 wall_ms=8.36 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 104 ok 793x1123 bytes=40910 render_ms=4.25 wall_ms=8.15 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 105 ok 793x1123 bytes=41493 render_ms=4.17 wall_ms=8.88 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 106 ok 793x1123 bytes=41870 render_ms=4.57 wall_ms=8.83 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 107 ok 793x1123 bytes=40958 render_ms=4.28 wall_ms=29.59 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 108 ok 793x1123 bytes=41944 render_ms=6.12 wall_ms=12.42 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 109 ok 793x1123 bytes=41873 render_ms=3.93 wall_ms=7.80 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 110 ok 793x1123 bytes=40430 render_ms=7.42 wall_ms=16.83 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 111 ok 793x1123 bytes=39231 render_ms=5.13 wall_ms=9.28 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 112 ok 793x1123 bytes=40119 render_ms=4.66 wall_ms=10.15 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 113 ok 793x1123 bytes=40568 render_ms=6.64 wall_ms=13.82 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 114 ok 793x1123 bytes=39736 render_ms=5.88 wall_ms=11.49 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 115 ok 793x1123 bytes=40330 render_ms=5.50 wall_ms=11.75 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 116 ok 793x1123 bytes=40692 render_ms=5.46 wall_ms=11.56 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 117 ok 793x1123 bytes=39748 render_ms=5.86 wall_ms=11.17 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 118 ok 793x1123 bytes=40787 render_ms=5.82 wall_ms=10.94 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 119 ok 793x1123 bytes=40697 render_ms=17.21 wall_ms=21.26 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 120 ok 793x1123 bytes=41324 render_ms=5.24 wall_ms=9.34 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 121 ok 793x1123 bytes=40103 render_ms=5.69 wall_ms=11.95 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 122 ok 793x1123 bytes=41017 render_ms=6.55 wall_ms=12.56 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 123 ok 793x1123 bytes=41445 render_ms=4.72 wall_ms=9.31 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 124 ok 793x1123 bytes=40580 render_ms=5.44 wall_ms=9.48 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 125 ok 793x1123 bytes=41230 render_ms=6.15 wall_ms=11.85 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 126 ok 793x1123 bytes=41573 render_ms=5.76 wall_ms=10.85 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 127 ok 793x1123 bytes=40670 render_ms=5.10 wall_ms=9.07 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 128 ok 793x1123 bytes=41699 render_ms=4.68 wall_ms=8.48 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 129 ok 793x1123 bytes=41586 render_ms=4.62 wall_ms=8.72 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 130 ok 793x1123 bytes=41707 render_ms=4.52 wall_ms=9.09 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 131 ok 793x1123 bytes=40496 render_ms=6.77 wall_ms=11.79 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 132 ok 793x1123 bytes=41397 render_ms=5.85 wall_ms=10.42 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 133 ok 793x1123 bytes=41827 render_ms=5.71 wall_ms=10.73 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 134 ok 793x1123 bytes=40978 render_ms=5.90 wall_ms=11.49 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 135 ok 793x1123 bytes=41627 render_ms=5.82 wall_ms=11.49 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 136 ok 793x1123 bytes=41968 render_ms=6.02 wall_ms=12.37 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 137 ok 793x1123 bytes=41069 render_ms=4.79 wall_ms=10.23 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 138 ok 793x1123 bytes=42010 render_ms=5.32 wall_ms=10.65 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 139 ok 793x1123 bytes=41955 render_ms=4.87 wall_ms=10.15 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 140 ok 793x1123 bytes=40875 render_ms=4.58 wall_ms=8.75 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 141 ok 793x1123 bytes=39674 render_ms=4.72 wall_ms=8.94 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 142 ok 793x1123 bytes=40566 render_ms=5.62 wall_ms=10.42 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 143 ok 793x1123 bytes=40985 render_ms=5.28 wall_ms=10.39 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 144 ok 793x1123 bytes=40088 render_ms=11.59 wall_ms=19.69 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 145 ok 793x1123 bytes=40775 render_ms=4.57 wall_ms=7.70 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 146 ok 793x1123 bytes=41136 render_ms=4.69 wall_ms=8.69 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 147 ok 793x1123 bytes=40191 render_ms=4.19 wall_ms=8.73 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 148 ok 793x1123 bytes=41216 render_ms=4.35 wall_ms=9.52 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 149 ok 793x1123 bytes=41142 render_ms=5.22 wall_ms=10.44 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 150 ok 793x1123 bytes=41559 render_ms=4.75 wall_ms=9.34 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 151 ok 793x1123 bytes=40334 render_ms=4.79 wall_ms=10.82 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 152 ok 793x1123 bytes=41253 render_ms=5.79 wall_ms=12.19 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 153 ok 793x1123 bytes=41675 render_ms=6.13 wall_ms=11.12 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 154 ok 793x1123 bytes=40795 render_ms=4.92 wall_ms=11.00 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 155 ok 793x1123 bytes=41377 render_ms=5.02 wall_ms=10.71 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 156 ok 793x1123 bytes=41801 render_ms=4.11 wall_ms=8.23 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 157 ok 793x1123 bytes=40816 render_ms=5.03 wall_ms=10.30 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 158 ok 793x1123 bytes=41899 render_ms=4.83 wall_ms=10.02 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 159 ok 793x1123 bytes=41803 render_ms=5.13 wall_ms=10.67 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 160 ok 793x1123 bytes=41864 render_ms=5.42 wall_ms=10.05 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 161 ok 793x1123 bytes=40669 render_ms=5.08 wall_ms=9.97 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 162 ok 793x1123 bytes=41563 render_ms=5.60 wall_ms=10.66 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 163 ok 793x1123 bytes=42011 render_ms=4.94 wall_ms=9.36 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 164 ok 793x1123 bytes=41169 render_ms=5.39 wall_ms=11.41 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 165 ok 793x1123 bytes=41787 render_ms=5.10 wall_ms=9.73 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 166 ok 793x1123 bytes=42120 render_ms=5.78 wall_ms=10.82 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 167 ok 793x1123 bytes=41244 render_ms=6.05 wall_ms=12.02 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 168 ok 793x1123 bytes=42235 render_ms=5.00 wall_ms=10.41 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 169 ok 793x1123 bytes=42128 render_ms=5.26 wall_ms=9.65 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 170 ok 793x1123 bytes=40972 render_ms=5.00 wall_ms=9.46 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 171 ok 793x1123 bytes=39705 render_ms=5.15 wall_ms=10.35 reopened=793x1123 png=true non_white=0.0888 distinct_colors=253
+PAGE 172 ok 793x1123 bytes=40654 render_ms=5.20 wall_ms=9.85 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 173 ok 793x1123 bytes=41050 render_ms=5.18 wall_ms=9.95 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 174 ok 793x1123 bytes=40212 render_ms=5.09 wall_ms=9.74 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 175 ok 793x1123 bytes=40773 render_ms=5.23 wall_ms=10.42 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 176 ok 793x1123 bytes=41227 render_ms=5.30 wall_ms=10.06 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 177 ok 793x1123 bytes=40191 render_ms=7.45 wall_ms=12.47 reopened=793x1123 png=true non_white=0.0889 distinct_colors=253
+PAGE 178 ok 793x1123 bytes=41297 render_ms=6.71 wall_ms=12.57 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 179 ok 793x1123 bytes=41205 render_ms=5.14 wall_ms=9.95 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 180 ok 793x1123 bytes=41948 render_ms=5.28 wall_ms=11.03 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 181 ok 793x1123 bytes=40776 render_ms=6.89 wall_ms=11.72 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 182 ok 793x1123 bytes=41677 render_ms=6.00 wall_ms=10.99 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 183 ok 793x1123 bytes=42049 render_ms=5.98 wall_ms=11.00 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 184 ok 793x1123 bytes=41242 render_ms=6.34 wall_ms=11.48 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 185 ok 793x1123 bytes=41885 render_ms=6.46 wall_ms=12.00 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 186 ok 793x1123 bytes=42248 render_ms=7.12 wall_ms=12.22 reopened=793x1123 png=true non_white=0.0894 distinct_colors=253
+PAGE 187 ok 793x1123 bytes=41312 render_ms=5.99 wall_ms=11.20 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 188 ok 793x1123 bytes=42261 render_ms=6.75 wall_ms=11.79 reopened=793x1123 png=true non_white=0.0894 distinct_colors=253
+PAGE 189 ok 793x1123 bytes=42210 render_ms=5.32 wall_ms=10.26 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 190 ok 793x1123 bytes=41855 render_ms=5.34 wall_ms=10.91 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 191 ok 793x1123 bytes=40656 render_ms=5.50 wall_ms=9.99 reopened=793x1123 png=true non_white=0.0890 distinct_colors=253
+PAGE 192 ok 793x1123 bytes=41568 render_ms=5.30 wall_ms=9.82 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 193 ok 793x1123 bytes=41976 render_ms=5.08 wall_ms=9.17 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 194 ok 793x1123 bytes=41126 render_ms=5.64 wall_ms=11.02 reopened=793x1123 png=true non_white=0.0892 distinct_colors=253
+PAGE 195 ok 793x1123 bytes=41788 render_ms=7.95 wall_ms=15.93 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 196 ok 793x1123 bytes=42127 render_ms=6.21 wall_ms=11.28 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 197 ok 793x1123 bytes=41229 render_ms=5.59 wall_ms=10.83 reopened=793x1123 png=true non_white=0.0891 distinct_colors=253
+PAGE 198 ok 793x1123 bytes=42198 render_ms=5.22 wall_ms=10.49 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 199 ok 793x1123 bytes=42115 render_ms=5.51 wall_ms=10.50 reopened=793x1123 png=true non_white=0.0893 distinct_colors=253
+PAGE 200 ok 793x1123 bytes=42505 render_ms=5.47 wall_ms=10.90 reopened=793x1123 png=true non_white=0.0894 distinct_colors=253
+SUMMARY pages_rendered=200 failures=0 total_ms=1817.81 mean_ms=9.09 peak_working_set_mb=18.9 outdir=C:\Users\berom\AppData\Local\Temp\dsh-Tes8tP\confi-m4-poc\renders-175540

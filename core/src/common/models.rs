@@ -216,10 +216,10 @@ mod tests {
         );
 
         // Both forms at once: ambiguous, one would otherwise win silently.
-        assert!(serde_json::from_str::<ResizeDimensions>(
-            r#"{"percentage": 50, "width": 800}"#
-        )
-        .is_err());
+        assert!(
+            serde_json::from_str::<ResizeDimensions>(r#"{"percentage": 50, "width": 800}"#)
+                .is_err()
+        );
 
         // Nothing at all: would otherwise mean "resize to the original size".
         assert!(serde_json::from_str::<ResizeDimensions>("{}").is_err());

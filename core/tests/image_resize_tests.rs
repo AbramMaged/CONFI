@@ -220,8 +220,14 @@ fn zero_percentage_is_rejected() {
     )
     .unwrap_err();
 
-    assert_eq!(err.code, confi_core::common::errors::ErrorCode::InvalidInput);
-    assert!(!output.exists(), "a rejected resize must not write an output file");
+    assert_eq!(
+        err.code,
+        confi_core::common::errors::ErrorCode::InvalidInput
+    );
+    assert!(
+        !output.exists(),
+        "a rejected resize must not write an output file"
+    );
 }
 
 #[test]
@@ -233,12 +239,17 @@ fn excessive_percentage_is_rejected() {
     // 100000% of 100px = 100000px, beyond the 65535 per-side limit.
     let err = resize::resize_image(
         &input,
-        ResizeDimensions::Percentage { percentage: 100_000 },
+        ResizeDimensions::Percentage {
+            percentage: 100_000,
+        },
         &output,
     )
     .unwrap_err();
 
-    assert_eq!(err.code, confi_core::common::errors::ErrorCode::InvalidInput);
+    assert_eq!(
+        err.code,
+        confi_core::common::errors::ErrorCode::InvalidInput
+    );
     assert!(!output.exists());
 }
 
@@ -258,7 +269,10 @@ fn excessive_width_is_rejected() {
     )
     .unwrap_err();
 
-    assert_eq!(err.code, confi_core::common::errors::ErrorCode::InvalidInput);
+    assert_eq!(
+        err.code,
+        confi_core::common::errors::ErrorCode::InvalidInput
+    );
 }
 
 #[test]

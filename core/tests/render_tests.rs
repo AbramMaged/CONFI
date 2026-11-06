@@ -27,7 +27,10 @@ fn pdfium_dir() -> Option<PathBuf> {
         .filter(|p| {
             let ok = p.exists();
             if !ok {
-                eprintln!("SKIP: CONFI_PDFIUM_DIR is set but does not exist: {}", p.display());
+                eprintln!(
+                    "SKIP: CONFI_PDFIUM_DIR is set but does not exist: {}",
+                    p.display()
+                );
             }
             ok
         })
@@ -48,10 +51,18 @@ macro_rules! require_pdfium {
 /// A one-page A4 PDF with a filled black rectangle, so a rendered page is
 /// provably not blank.
 fn write_fixture(dir: &TempDir) -> PathBuf {
-    let path = dir.path().join("one-page.pdf");
+    write_fixture_sized(dir, "one-page.pdf", 595, 842)
+}
+
+/// Same, with an arbitrary MediaBox — used to provoke the allocation guard.
+fn write_fixture_sized(dir: &TempDir, name: &str, width: i64, height: i64) -> PathBuf {
+    let path = dir.path().join(name);
     let mut doc = Document::with_version("1.7");
 
-    let content = Stream::new(Dictionary::new(), b"0 0 0 rg 100 600 300 100 re f\n".to_vec());
+    let content = Stream::new(
+        Dictionary::new(),
+        b"0 0 0 rg 100 600 300 100 re f\n".to_vec(),
+    );
     let content_id = doc.add_object(content);
     let pages_id = doc.new_object_id();
 
@@ -63,8 +74,8 @@ fn write_fixture(dir: &TempDir) -> PathBuf {
         Object::Array(vec![
             Object::Integer(0),
             Object::Integer(0),
-            Object::Integer(595),
-            Object::Integer(842),
+            Object::Integer(width),
+            Object::Integer(height),
         ]),
     );
     page.set("Contents", Object::Reference(content_id));
@@ -106,8 +117,14 @@ fn renders_page_at_expected_pixel_size() {
 
     // The rectangle must actually be drawn.
     let rgb = decoded.to_rgb8();
-    let dark = rgb.pixels().filter(|p| p[0] < 60 && p[1] < 60 && p[2] < 60).count();
-    assert!(dark > 1000, "expected the filled rectangle, found {dark} dark pixels");
+    let dark = rgb
+        .pixels()
+        .filter(|p| p[0] < 60 && p[1] < 60 && p[2] < 60)
+        .count();
+    assert!(
+        dark > 1000,
+        "expected the filled rectangle, found {dark} dark pixels"
+    );
 }
 
 #[test]
@@ -117,8 +134,8 @@ fn out_of_range_page_returns_invalid_input() {
 
     let tmp = TempDir::new().unwrap();
     let input = write_fixture(&tmp);
-    let err = render::render_page_to_png(&pdfium, &input, 2, 96, &tmp.path().join("x.png"))
-        .unwrap_err();
+    let err =
+        render::render_page_to_png(&pdfium, &input, 2, 96, &tmp.path().join("x.png")).unwrap_err();
     assert_eq!(err.code, ErrorCode::InvalidInput);
 }
 
@@ -133,7 +150,11 @@ fn dpi_outside_supported_range_returns_invalid_input() {
     for dpi in [0u32, 71, 601] {
         let err = render::render_page_to_png(&pdfium, &input, 1, dpi, &tmp.path().join("x.png"))
             .unwrap_err();
-        assert_eq!(err.code, ErrorCode::InvalidInput, "dpi {dpi} should be rejected");
+        assert_eq!(
+            err.code,
+            ErrorCode::InvalidInput,
+            "dpi {dpi} should be rejected"
+        );
     }
 }
 
@@ -157,6 +178,84 @@ fn corrupt_pdf_returns_corrupted_file() {
     let err =
         render::render_page_to_png(&pdfium, &input, 1, 96, &tmp.path().join("x.png")).unwrap_err();
     assert_eq!(err.code, ErrorCode::CorruptedFile);
+}
+
+#[test]
+fn render_page_rgba_rejects_bad_dpi_without_a_second_check() {
+    // render_page_rgba is public; its own validation must not depend on the
+    // caller having gone through render_page_to_png first.
+    let dir = require_pdfium!();
+    let pdfium = render::bind_pdfium(&dir).unwrap();
+
+    let tmp = TempDir::new().unwrap();
+    let input = write_fixture(&tmp);
+    let err = render::render_page_rgba(&pdfium, &input, 1, 10_000).unwrap_err();
+    assert_eq!(err.code, ErrorCode::InvalidInput);
+}
+
+#[test]
+fn page_zero_is_rejected() {
+    let dir = require_pdfium!();
+    let pdfium = render::bind_pdfium(&dir).unwrap();
+
+    let tmp = TempDir::new().unwrap();
+    let input = write_fixture(&tmp);
+
+    let err =
+        render::render_page_rgba(&pdfium, &input, 0, 96).expect_err("page 0 must be rejected");
+    assert_eq!(err.code, ErrorCode::InvalidInput);
+
+    let err = render::page_size(&pdfium, &input, 0).unwrap_err();
+    assert_eq!(err.code, ErrorCode::InvalidInput);
+}
+
+#[test]
+fn allocation_budget_rejects_oversized_page_before_rendering() {
+    let dir = require_pdfium!();
+    let pdfium = render::bind_pdfium(&dir).unwrap();
+
+    let tmp = TempDir::new().unwrap();
+    // 20,000 x 20,000 pt at 72 dpi = 400 Mpixels, above the 100 Mpixel budget.
+    let input = write_fixture_sized(&tmp, "huge.pdf", 20_000, 20_000);
+    let output = tmp.path().join("huge.png");
+
+    let err = render::render_page_to_png(&pdfium, &input, 1, 72, &output).unwrap_err();
+    assert_eq!(err.code, ErrorCode::InvalidInput);
+    assert!(
+        err.message.contains("pixel budget"),
+        "expected the allocation budget to be cited, got: {}",
+        err.message
+    );
+    assert!(
+        !output.exists(),
+        "no output may be written when the guard fires"
+    );
+}
+
+#[test]
+fn failed_render_leaves_no_output_file() {
+    let dir = require_pdfium!();
+    let pdfium = render::bind_pdfium(&dir).unwrap();
+
+    let tmp = TempDir::new().unwrap();
+    let input = tmp.path().join("broken.pdf");
+    std::fs::write(&input, b"not a pdf at all").unwrap();
+    let output = tmp.path().join("out.png");
+
+    let _ = render::render_page_to_png(&pdfium, &input, 1, 96, &output);
+
+    assert!(
+        !output.exists(),
+        "a failed render must not leave an output file"
+    );
+    // No leftover temp files in the destination directory either.
+    let leftovers: Vec<_> = std::fs::read_dir(tmp.path())
+        .unwrap()
+        .filter_map(Result::ok)
+        .map(|e| e.file_name().to_string_lossy().into_owned())
+        .filter(|name| name.contains("confi-tmp"))
+        .collect();
+    assert!(leftovers.is_empty(), "temp files leaked: {leftovers:?}");
 }
 
 #[test]

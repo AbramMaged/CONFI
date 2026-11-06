@@ -208,11 +208,8 @@ fn format_supports_alpha(format: ImageOutputFormat) -> bool {
 /// Uses the crate's own source-over blend rather than a per-pixel loop.
 fn flatten_to_white(img: DynamicImage) -> DynamicImage {
     let rgba = img.to_rgba8();
-    let mut canvas = image::RgbaImage::from_pixel(
-        rgba.width(),
-        rgba.height(),
-        Rgba([255, 255, 255, 255]),
-    );
+    let mut canvas =
+        image::RgbaImage::from_pixel(rgba.width(), rgba.height(), Rgba([255, 255, 255, 255]));
     image::imageops::overlay(&mut canvas, &rgba, 0, 0);
     DynamicImage::ImageRgba8(canvas)
 }

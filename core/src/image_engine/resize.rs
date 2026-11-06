@@ -49,10 +49,7 @@ pub fn resize_image(
     let mut warnings = Vec::new();
 
     // A 0% request resolves to a 1x1 image, which is never what the user meant.
-    if matches!(
-        dimensions,
-        ResizeDimensions::Percentage { percentage: 0 }
-    ) {
+    if matches!(dimensions, ResizeDimensions::Percentage { percentage: 0 }) {
         return Err(ConfiError::invalid_input(
             "Percentage must be at least 1. A 0% resize would produce a 1×1 image.",
         ));

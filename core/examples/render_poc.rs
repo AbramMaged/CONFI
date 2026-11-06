@@ -49,10 +49,7 @@ fn main() {
     let pdfium = match render::bind_pdfium(&lib_dir) {
         Ok(pdfium) => pdfium,
         Err(e) => {
-            println!(
-                "BIND_FAILED code={} message={}",
-                e.code, e.message
-            );
+            println!("BIND_FAILED code={} message={}", e.code, e.message);
             if let Some(detail) = &e.detail {
                 println!("BIND_FAILED detail={detail}");
             }
@@ -60,7 +57,10 @@ fn main() {
         }
     };
     let bind_ms = started.elapsed().as_secs_f64() * 1000.0;
-    println!("BIND ok bind_ms={bind_ms:.2} library_dir={}", lib_dir.display());
+    println!(
+        "BIND ok bind_ms={bind_ms:.2} library_dir={}",
+        lib_dir.display()
+    );
 
     // ── Open ────────────────────────────────────────────────────────────────
     let started = Instant::now();
@@ -180,7 +180,11 @@ fn peak_working_set_mb() -> f64 {
     #[link(name = "kernel32")]
     extern "system" {
         fn GetCurrentProcess() -> isize;
-        fn K32GetProcessMemoryInfo(process: isize, counters: *mut ProcessMemoryCounters, size: u32) -> i32;
+        fn K32GetProcessMemoryInfo(
+            process: isize,
+            counters: *mut ProcessMemoryCounters,
+            size: u32,
+        ) -> i32;
     }
 
     let mut counters = ProcessMemoryCounters {

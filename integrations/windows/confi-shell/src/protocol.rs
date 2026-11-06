@@ -181,4 +181,3 @@ pub fn validate_request(req: &ConfiRequest) -> Result<(), IpcError> {
 
     Ok(())
 }
-
