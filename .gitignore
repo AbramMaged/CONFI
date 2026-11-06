@@ -1,0 +1,11 @@
+﻿# Rust build artifacts
+/target
+**/target
+
+# Node (Tauri frontend, when it lands)
+node_modules/
+dist/
+
+# Local scratch
+*.tmp
+.confi-tmp-*

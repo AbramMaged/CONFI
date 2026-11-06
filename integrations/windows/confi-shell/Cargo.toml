@@ -1,0 +1,32 @@
+[package]
+name = "confi-shell"
+version.workspace = true
+edition.workspace = true
+description = "CONFI Windows shell integration prototype — NOT production code"
+publish = false
+
+[lib]
+name = "confi_shell"
+path = "src/lib.rs"
+
+[[bin]]
+name = "confi-shell"
+path = "src/main.rs"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"
+
+# Windows-specific: named pipe IPC
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.58", features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_Storage_FileSystem",
+    "Win32_System_Pipes",
+    "Win32_System_IO",
+] }

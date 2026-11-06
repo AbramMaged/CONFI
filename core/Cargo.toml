@@ -1,0 +1,58 @@
+[package]
+name = "confi-core"
+version.workspace = true
+edition.workspace = true
+description = "CONFI shared processing engine — file detection, image operations, PDF operations"
+publish = false
+
+[lib]
+name = "confi_core"
+crate-type = ["lib"]
+
+[dependencies]
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Error handling
+thiserror = { workspace = true }
+
+# Utilities
+uuid = { workspace = true }
+chrono = { workspace = true }
+log = { workspace = true }
+
+# File type detection via magic bytes (MIT)
+infer = "0.16"
+
+# Image processing — pure Rust, MIT/Apache
+# Features explicitly listed to keep binary size controlled
+image = { version = "0.25", default-features = false, features = [
+    "jpeg",
+    "png",
+    "webp",
+    "bmp",
+    "rayon",
+] }
+
+# PNG lossless optimization (MIT)
+oxipng = { version = "9", default-features = false, features = ["filetime"] }
+
+# WebP lossy encoding via libwebp bindings (Apache-2.0)
+# Optional: the `image` crate can decode WebP but has limited lossy encode quality control.
+# This crate wraps libwebp and supports quality-controlled lossy encode.
+# Feature-gated until the PoC confirms it cross-compiles to Android arm64.
+webp = { version = "0.3", optional = true }
+
+# PDF engine — lopdf (MIT). Committed for merge/split/rotate as of M3.
+# Rendering (PDFium) is a separate decision, still pending for M4.
+lopdf = "0.34"
+
+[features]
+default = []
+# Enable lossy WebP encoding via libwebp
+webp-encode = ["dep:webp"]
+
+[dev-dependencies]
+tempfile = "3"
+pretty_assertions = "1"
