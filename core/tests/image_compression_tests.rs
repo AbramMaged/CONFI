@@ -150,6 +150,28 @@ fn original_file_unchanged_after_compression() {
     assert_eq!(original_bytes, after_bytes, "Original must not be modified");
 }
 
+// ── WebP compression (lossy disabled by default) ────────────────────────────
+
+#[test]
+fn webp_compression_reports_quality_warning_when_lossy_disabled() {
+    let dir = TempDir::new().unwrap();
+    let input = dir.path().join("input.webp");
+    let img = image::RgbImage::from_fn(10, 10, |_, _| image::Rgb([100, 150, 200]));
+    img.save_with_format(&input, image::ImageFormat::WebP).unwrap();
+    let output = dir.path().join("output.webp");
+
+    let r = compression::compress_image(&input, &FileFormat::Webp, Some(60), &output).unwrap();
+
+    #[cfg(not(feature = "webp-encode"))]
+    assert!(
+        r.warnings
+            .iter()
+            .any(|w| w.contains("quality (60)") || w.contains("quality control")),
+        "Expected warning about WebP quality, got: {:?}",
+        r.warnings
+    );
+}
+
 // ── Size increase handling ───────────────────────────────────────────────────
 
 #[test]

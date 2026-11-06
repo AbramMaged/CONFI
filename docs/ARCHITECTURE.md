@@ -342,19 +342,57 @@ android/app/src/main/kotlin/confi/uniffi/*.kt  (generated)
 | `file_engine::detection` | Magic-byte analysis, MIME type resolution |
 | `file_engine::validation` | Input sanity checks before operations begin |
 | `file_engine::metadata` | File size, format, page count (PDFs), dimensions (images) |
-| `pdf_engine::merge` | PDF concatenation, page preservation |
-| `pdf_engine::split` | Page-range splitting |
-| `pdf_engine::rotate` | Per-page rotation |
-| `pdf_engine::organize` | Page reordering, deletion, duplication |
-| `pdf_engine::compress` | Structural + image optimization of PDFs |
-| `pdf_engine::render` | Page thumbnail rasterization (PDFium) |
-| `pdf_engine::image_conversion` | PDF-to-image and image-to-PDF workflows |
+| `pdf_engine::merge` | PDF concatenation, page preservation (lopdf) |
+| `pdf_engine::split` | Page-range splitting (lopdf) |
+| `pdf_engine::rotate` | Per-page rotation (lopdf) |
+| `pdf_engine::render` | Page rasterisation, thumbnails (PDFium, `render` feature) |
+| `pdf_engine::organize` | Page reordering, deletion, duplication (not started) |
+| `pdf_engine::compress` | Structural + image optimization of PDFs (not started) |
+| `pdf_engine::image_conversion` | PDF-to-image and image-to-PDF workflows (not started) |
 | `image_engine::conversion` | Format conversion |
 | `image_engine::compression` | Lossy/lossless compression |
 | `image_engine::resize` | Dimension-based and percentage-based resizing |
 | `job_manager::queue` | Job lifecycle management |
 | `job_manager::progress` | Progress event emission |
 | `job_manager::cancellation` | Cancellation token creation and propagation |
+
+### PDF Rendering (M4 PoC — validated on Windows x64)
+
+Rendering is a **separate, feature-gated module** from the structural engine. Merge,
+split and rotate run on `lopdf` and never touch the native library; only
+`pdf_engine::render` uses PDFium. This keeps a missing or failed-to-load PDFium from
+breaking folder, image and PDF-reorganisation features.
+
+```rust
+// Bind once per process; the handle is passed to every render call.
+pub fn bind_pdfium(library_dir: &Path) -> ConfiResult<Pdfium>;
+
+// Metadata, read through PDFium so it can cross-check lopdf
+pub fn page_count(pdfium: &Pdfium, pdf: &Path) -> ConfiResult<u32>;
+pub fn page_size(pdfium: &Pdfium, pdf: &Path, page: u32) -> ConfiResult<(f32, f32)>;
+
+// Rasterise. `page` is 1-indexed, `dpi` is 72..=600, output goes through
+// temp → validate → rename like every other engine write.
+pub fn render_page_to_png(
+    pdfium: &Pdfium, pdf: &Path, page: u32, dpi: u32, output: &Path,
+) -> ConfiResult<RenderResult>;
+
+// In-memory RGBA, for thumbnails that never touch disk.
+pub fn render_page_rgba(
+    pdfium: &Pdfium, pdf: &Path, page: u32, dpi: u32,
+) -> ConfiResult<RgbaBitmap>;
+```
+
+Rules that apply to both platform layers:
+
+- **Feature-gated** (`render`): the default build has no native dependency.
+- **Dynamically bound**: `pdfium.dll` / `libpdfium.so` is loaded at runtime from a
+  caller-supplied directory. Nothing links at build time, no env var required.
+- **Bind once**, not per page (measured 6–9 ms; per-page rebinding would dominate).
+- **Not thread-safe**: PDFium instances must not be shared across threads. The core does
+  not spawn threads, so the host owns the instance and serialises access.
+- **Native library provenance** is pinned (PDFium 159.0.8138.0, SHA-256 verified) via
+  `tools/fetch-pdfium.ps1`; measured results are in `docs/PDFIUM-POC.md`.
 
 ### Input/Output Abstraction
 

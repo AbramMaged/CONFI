@@ -31,14 +31,16 @@
 |---|---|---|---|---|---|---|
 | `lopdf` | 0.34 | MIT | ✓ | ✓ | ✅ Approved | Pure Rust PDF read/write; used by `pdf_engine` for merge, split and rotate (M3). No rendering. Android cross-compilation to be confirmed in M8. |
 | `pdf` | latest | MIT/Apache | ✓ | ✓ | 🔍 Evaluate | Alternative pure-Rust reader |
-| `pdfium-render` | latest | MIT (bindings) | ✓ | ✓ | 🔍 Evaluate | Rust bindings to PDFium; PDFium is BSD-3. Requires bundling prebuilt PDFium binary. Android cross-compilation needs verification. |
+| `pdfium-render` | 0.9.5 | MIT OR Apache-2.0 | ✓ | ✓ | ✅ Approved | Rust bindings to PDFium, dynamic (`libloading`) binding — nothing links at build time. Used only by `pdf_engine::render` behind the `render` feature. CONFI uses the MIT option. Verified on Windows x64; Android arm64 **not yet runtime-tested**. |
+| `pdfium` (native) | 159.0.8138.0 (chromium/8138) | BSD-3-Clause | ✓ | ✓ | ✅ Approved | Prebuilt by github.com/bblanchon/pdfium-binaries. Windows DLL 7.46 MiB, Android .so 6.45 MiB. Pinned with SHA-256 in `tools/fetch-pdfium.ps1`; binaries fetched, not committed. Licence texts in `LICENSES/pdfium/`. See `docs/PDFIUM-POC.md`. |
 | `qpdf` (sys/FFI) | — | Apache 2.0 | ✓ | 🔍 | 🔍 Evaluate | qpdf itself is Apache 2.0. Android cross-compilation requires toolchain work. |
 | PDFBox | — | Apache 2.0 | ✓ | 🔍 | ⚠️ Review | JVM dependency complicates Android integration from Rust. Likely unsuitable for shared core. |
 
-> **Decision (resolved at M3):** `lopdf` (MIT, pure Rust) is committed for PDF
-> manipulation — merge, split and rotate are implemented and tested on it.
-> `pdfium-render` remains 🔍 Evaluate and is only needed if M4 rendering and
-> thumbnails require a rasterizer; `qpdf` is not needed for v1.0.
+> **Decision (resolved at M3/M4):** `lopdf` (MIT, pure Rust) is committed for PDF
+> **manipulation** — merge, split and rotate. PDFium is committed for **rendering only**
+> (`pdf_engine::render`, feature-gated, dynamically bound); it is never used as the
+> merge/split engine. `qpdf` is not needed for v1.0. See `docs/PDFIUM-POC.md` for the
+> measured Windows results and the Android status.
 
 ### Image Processing
 

@@ -1,0 +1,14 @@
+# pdfium-render 0.9.5
+
+Licensed under either of the following, at your option:
+
+* Apache License, Version 2.0 — https://www.apache.org/licenses/LICENSE-2.0
+* MIT License — https://opensource.org/licenses/MIT
+
+Upstream: https://github.com/ajrcarey/pdfium-render
+
+CONFI uses this crate under the MIT option. The Apache-2.0 option is noted for
+completeness; if CONFI ever ships under Apache-2.0 terms, the full Apache text and
+any NOTICE file must be added here.
+
+No modifications are made to this crate.

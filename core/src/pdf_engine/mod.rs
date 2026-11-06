@@ -13,6 +13,11 @@ pub mod merge;
 pub mod rotate;
 pub mod split;
 
+// Rendering is deliberately a separate, feature-gated module: it needs the
+// PDFium native library, while merge/split/rotate are pure Rust on lopdf.
+#[cfg(feature = "render")]
+pub mod render;
+
 pub use merge::merge_pdfs;
 pub use rotate::rotate_pdf;
 pub use split::{extract_pages, split_to_pages};

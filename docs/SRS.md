@@ -362,7 +362,7 @@ The first release is ready when:
 | M1 | Rust foundation: file detection, error types, models | 1 week | ✅ Completed |
 | M2 | Image engine: conversion, compression, resizing | 1–2 weeks | ✅ Completed |
 | M3 | PDF engine: merge, split, rotate (PoC validates library choice first) | 2 weeks | ✅ Completed |
-| M4 | PDF engine: rendering, organize, page thumbnails | 1–2 weeks | ⬜ Next |
+| M4 | PDF engine: rendering, organize, page thumbnails | 1–2 weeks | 🟡 Rendering PoC done (Windows x64); organize + thumbnails pending |
 | M5 | PDF engine: compress, JPG conversion | 1–2 weeks | ⬜ |
 | M6 | Windows app: Tauri + React, navigation, design system, core operations | 2 weeks | ⬜ |
 | M7 | Windows Explorer context-menu integration (core Windows requirement) | 1–2 weeks | ⬜ |

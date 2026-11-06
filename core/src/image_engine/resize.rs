@@ -48,12 +48,39 @@ pub fn resize_image(
     let (orig_w, orig_h) = (img.width(), img.height());
     let mut warnings = Vec::new();
 
+    // A 0% request resolves to a 1x1 image, which is never what the user meant.
+    if matches!(
+        dimensions,
+        ResizeDimensions::Percentage { percentage: 0 }
+    ) {
+        return Err(ConfiError::invalid_input(
+            "Percentage must be at least 1. A 0% resize would produce a 1×1 image.",
+        ));
+    }
+
     let (target_w, target_h) = resolve_dimensions(orig_w, orig_h, &dimensions);
 
     if target_w == 0 || target_h == 0 {
-        return Err(ConfiError::invalid_operation(
+        return Err(ConfiError::invalid_input(
             "Target dimensions must be greater than zero.",
         ));
+    }
+
+    // Refuse sizes that no encoder can honour or that would exhaust memory,
+    // instead of failing deep inside a huge allocation.
+    // ponytail: fixed budget; raise it if large-format (CAD/poster) work needs it.
+    const MAX_DIMENSION: u32 = 65_535;
+    const MAX_PIXELS: u64 = 100_000_000;
+
+    if target_w > MAX_DIMENSION || target_h > MAX_DIMENSION {
+        return Err(ConfiError::invalid_input(format!(
+            "Requested size {target_w}×{target_h} exceeds the {MAX_DIMENSION} pixel per-side limit."
+        )));
+    }
+    if (target_w as u64) * (target_h as u64) > MAX_PIXELS {
+        return Err(ConfiError::invalid_input(format!(
+            "Requested size {target_w}×{target_h} exceeds the {MAX_PIXELS} pixel budget."
+        )));
     }
 
     if target_w > orig_w || target_h > orig_h {

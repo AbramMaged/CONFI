@@ -91,12 +91,11 @@ pub enum ImageOutputFormat {
 
 /// Resize dimensions — either explicit pixels or a percentage.
 ///
-/// Variant order matters: `serde(untagged)` tries variants top to bottom, and
-/// the `Pixels` variant can match *any* object because both of its fields are
-/// optional. `Percentage` therefore comes first — its required `percentage`
-/// field makes it match only when that key is actually present, so
-/// `{"percentage": 50}` cannot be silently read as `{width: None, height: None}`.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// Deserialization is hand-written (see `RawResizeDimensions`) because the
+/// obvious `#[serde(untagged)]` enum silently mis-reads valid input: with an
+/// all-optional `Pixels` variant, `{"percentage": 50}` parses as
+/// `{width: None, height: None}` and the resize becomes a no-op.
+#[derive(Debug, Clone, Serialize)]
 #[serde(untagged)]
 pub enum ResizeDimensions {
     /// Scale by percentage (e.g., 50 = 50% of original size).
@@ -106,6 +105,41 @@ pub enum ResizeDimensions {
         width: Option<u32>,
         height: Option<u32>,
     },
+}
+
+/// Wire shape used to inspect a resize request before it becomes a variant.
+///
+/// `deny_unknown_fields` plus the explicit match below are what stop four
+/// silent failures: unknown keys being ignored, a percentage request being read
+/// as "no constraint", both forms supplied with one silently winning, and an
+/// empty object meaning "resize to the original size".
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct RawResizeDimensions {
+    width: Option<u32>,
+    height: Option<u32>,
+    percentage: Option<u32>,
+}
+
+impl<'de> Deserialize<'de> for ResizeDimensions {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let raw = RawResizeDimensions::deserialize(deserializer)?;
+        let has_pixels = raw.width.is_some() || raw.height.is_some();
+
+        match (raw.percentage, has_pixels) {
+            (Some(_), true) => Err(serde::de::Error::custom(
+                "specify either 'percentage' or 'width'/'height', not both",
+            )),
+            (None, false) => Err(serde::de::Error::custom(
+                "specify 'percentage' or at least one of 'width'/'height'",
+            )),
+            (Some(percentage), false) => Ok(ResizeDimensions::Percentage { percentage }),
+            (None, true) => Ok(ResizeDimensions::Pixels {
+                width: raw.width,
+                height: raw.height,
+            }),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -153,11 +187,42 @@ mod tests {
             }
         ));
 
+        let height_only: ResizeDimensions = serde_json::from_str(r#"{"height": 600}"#).unwrap();
+        assert!(matches!(
+            height_only,
+            ResizeDimensions::Pixels {
+                width: None,
+                height: Some(600)
+            }
+        ));
+
         // API.md shape 2: percentage. Must not be swallowed by the Pixels variant.
         let percent: ResizeDimensions = serde_json::from_str(r#"{"percentage": 50}"#).unwrap();
         assert!(matches!(
             percent,
             ResizeDimensions::Percentage { percentage: 50 }
         ));
+    }
+
+    #[test]
+    fn resize_dimensions_reject_invalid_input() {
+        // Negative: rejected by the u32 type itself.
+        assert!(serde_json::from_str::<ResizeDimensions>(r#"{"percentage": -50}"#).is_err());
+        assert!(serde_json::from_str::<ResizeDimensions>(r#"{"width": -800}"#).is_err());
+
+        // Unknown field: must not be silently dropped.
+        assert!(
+            serde_json::from_str::<ResizeDimensions>(r#"{"width": 800, "heigth": 600}"#).is_err()
+        );
+
+        // Both forms at once: ambiguous, one would otherwise win silently.
+        assert!(serde_json::from_str::<ResizeDimensions>(
+            r#"{"percentage": 50, "width": 800}"#
+        )
+        .is_err());
+
+        // Nothing at all: would otherwise mean "resize to the original size".
+        assert!(serde_json::from_str::<ResizeDimensions>("{}").is_err());
+        assert!(serde_json::from_str::<ResizeDimensions>(r#"{"quality": 80}"#).is_err());
     }
 }

@@ -42,13 +42,25 @@ oxipng = { version = "9", default-features = false, features = ["filetime"] }
 webp = { version = "0.3", optional = true }
 
 # PDF engine — lopdf (MIT). Committed for merge/split/rotate as of M3.
-# Rendering (PDFium) is a separate decision, still pending for M4.
+# Structural operations only. Rendering is a separate module (see below).
 lopdf = "0.34"
+
+# PDF rendering — pdfium-render (MIT bindings) around PDFium (BSD-3, prebuilt
+# binary vendored under vendor/pdfium). Feature-gated so the structural engine
+# never depends on a native library. Dynamic binding: the DLL/so is loaded at
+# runtime, nothing is linked at build time.
+pdfium-render = { version = "0.9.5", optional = true }
 
 [features]
 default = []
 # Enable lossy WebP encoding via libwebp
 webp-encode = ["dep:webp"]
+# Enable PDF rasterisation (page previews, thumbnails, PDF-to-image)
+render = ["dep:pdfium-render"]
+
+[[example]]
+name = "render_poc"
+required-features = ["render"]
 
 [dev-dependencies]
 tempfile = "3"

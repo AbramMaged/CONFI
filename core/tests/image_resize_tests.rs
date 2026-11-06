@@ -205,6 +205,78 @@ fn refuses_to_overwrite_existing_output() {
     assert_eq!(std::fs::read(&output).unwrap(), b"existing");
 }
 
+// ── Invalid input must error, never silently "succeed" ──────────────────────
+
+#[test]
+fn zero_percentage_is_rejected() {
+    let dir = TempDir::new().unwrap();
+    let input = create_test_image(&dir, "input.png", 100, 100);
+    let output = dir.path().join("out.png");
+
+    let err = resize::resize_image(
+        &input,
+        ResizeDimensions::Percentage { percentage: 0 },
+        &output,
+    )
+    .unwrap_err();
+
+    assert_eq!(err.code, confi_core::common::errors::ErrorCode::InvalidInput);
+    assert!(!output.exists(), "a rejected resize must not write an output file");
+}
+
+#[test]
+fn excessive_percentage_is_rejected() {
+    let dir = TempDir::new().unwrap();
+    let input = create_test_image(&dir, "input.png", 100, 100);
+    let output = dir.path().join("out.png");
+
+    // 100000% of 100px = 100000px, beyond the 65535 per-side limit.
+    let err = resize::resize_image(
+        &input,
+        ResizeDimensions::Percentage { percentage: 100_000 },
+        &output,
+    )
+    .unwrap_err();
+
+    assert_eq!(err.code, confi_core::common::errors::ErrorCode::InvalidInput);
+    assert!(!output.exists());
+}
+
+#[test]
+fn excessive_width_is_rejected() {
+    let dir = TempDir::new().unwrap();
+    let input = create_test_image(&dir, "input.png", 100, 100);
+    let output = dir.path().join("out.png");
+
+    let err = resize::resize_image(
+        &input,
+        ResizeDimensions::Pixels {
+            width: Some(100_000),
+            height: None,
+        },
+        &output,
+    )
+    .unwrap_err();
+
+    assert_eq!(err.code, confi_core::common::errors::ErrorCode::InvalidInput);
+}
+
+#[test]
+fn malformed_json_shapes_are_rejected_before_resizing() {
+    // Negative, unknown-field, both-forms and empty requests all fail to
+    // deserialize, so they can never reach the engine as a silent no-op.
+    for json in [
+        r#"{"percentage": -50}"#,
+        r#"{"width": -800, "height": 600}"#,
+        r#"{"width": 800, "heigth": 600}"#,
+        r#"{"percentage": 50, "width": 800}"#,
+        "{}",
+    ] {
+        let parsed = serde_json::from_str::<ResizeDimensions>(json);
+        assert!(parsed.is_err(), "expected rejection for: {json}");
+    }
+}
+
 // ── Output format matches extension ──────────────────────────────────────────
 
 #[test]

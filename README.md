@@ -61,6 +61,7 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full architecture doc
 | [`docs/SRS.md`](docs/SRS.md) | Software Requirements Specification |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Technical architecture |
 | [`docs/API.md`](docs/API.md) | Core processing API reference |
+| [`docs/PDFIUM-POC.md`](docs/PDFIUM-POC.md) | M4 PDFium rendering PoC: measurements, evidence, Android status |
 | [`docs/SUPPORTED_FORMATS.md`](docs/SUPPORTED_FORMATS.md) | Supported file formats |
 | [`docs/TESTING.md`](docs/TESTING.md) | Testing strategy and acceptance criteria |
 | [`LICENSES/INVENTORY.md`](LICENSES/INVENTORY.md) | Dependency and license inventory |
@@ -79,7 +80,8 @@ No user interface yet; M6 (Windows app) is next after PDF rendering.
 | `file_engine` — detection, validation | ✅ done, tested |
 | `image_engine` — convert, compress, resize | ✅ done, tested |
 | `pdf_engine` — merge, split, rotate | ✅ done, tested |
-| `pdf_engine` — render, organize, compress, PDF↔image | ⬜ M4–M5 |
+| `pdf_engine` — render (PDFium) | ✅ PoC validated on Windows x64 · Android NOT TESTED ([report](docs/PDFIUM-POC.md)) |
+| `pdf_engine` — organize, compress, PDF↔image | ⬜ M4–M5 |
 | `job_manager` — queue, progress, cancellation | ⬜ not started |
 | Windows app (Tauri + React) | ⬜ not started |
 | Explorer context menu | ⬜ prototype only, not registered |
